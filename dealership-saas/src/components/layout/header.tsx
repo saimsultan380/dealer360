@@ -1,0 +1,339 @@
+'use client';
+
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Bell, LogOut, User, Settings, AlertTriangle, Clock, Building2, Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Image from 'next/image';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { useSidebarStore, useAuthStore } from '@/lib/store';
+import { createClient } from '@/lib/supabase/client';
+import { MobileSidebar } from './mobile-sidebar';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { getPendingDeals, PendingDeal } from '@/lib/actions/deals';
+import { Badge } from '@/components/ui/badge';
+
+export function Header() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const { profile, organization } = useAuthStore();
+    const { isCollapsed } = useSidebarStore();
+    const [pendingDeals, setPendingDeals] = useState<PendingDeal[]>([]);
+    const [notificationCount, setNotificationCount] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Get module name from pathname
+    const getModuleName = () => {
+        if (pathname === '/dashboard' || pathname === '/dashboard/') return 'Dashboard';
+        if (pathname.startsWith('/dashboard/today-book')) return 'Today Book';
+        if (pathname.startsWith('/dashboard/inventory')) return 'Inventory';
+        if (pathname.startsWith('/dashboard/leads')) return 'Leads';
+        if (pathname.startsWith('/dashboard/deals')) return 'Deals';
+        if (pathname.startsWith('/dashboard/investors')) return 'Investors';
+        if (pathname.startsWith('/dashboard/clients')) return 'Clients';
+        if (pathname.startsWith('/dashboard/cash-flow')) return 'Cash Flow';
+        if (pathname.startsWith('/dashboard/documents')) return 'Documents';
+        if (pathname.startsWith('/dashboard/settings')) return 'Settings';
+        if (pathname.startsWith('/dashboard/profile')) return 'Profile';
+        return 'Dashboard';
+    };
+
+    useEffect(() => {
+        async function fetchNotifications() {
+            try {
+                const { data } = await getPendingDeals();
+                if (data) {
+                    setPendingDeals(data);
+                    // Count overdue and upcoming (within 7 days) deals
+                    const overdue = data.filter(d => d.is_overdue).length;
+                    const upcoming = data.filter(
+                        d => !d.is_overdue && d.days_until_payment !== null && d.days_until_payment <= 7 && d.days_until_payment >= 0
+                    ).length;
+                    setNotificationCount(overdue + upcoming);
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+        fetchNotifications();
+        // Refresh every 5 minutes
+        const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const mql = window.matchMedia('(max-width: 639px)');
+        const onChange = () => setIsMobile(mql.matches);
+
+        onChange();
+
+        // Safari < 14 support
+        if (typeof mql.addEventListener === 'function') {
+            mql.addEventListener('change', onChange);
+            return () => mql.removeEventListener('change', onChange);
+        }
+
+        // eslint-disable-next-line deprecation/deprecation
+        mql.addListener(onChange);
+        // eslint-disable-next-line deprecation/deprecation
+        return () => mql.removeListener(onChange);
+    }, []);
+
+    const handleLogout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push('/login');
+    };
+
+    const initials = profile?.full_name
+        ?.split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase() || 'U';
+
+    const overdueDeals = pendingDeals.filter(d => d.is_overdue);
+    const upcomingDeals = pendingDeals.filter(
+        d => !d.is_overdue && d.days_until_payment !== null && d.days_until_payment <= 7 && d.days_until_payment >= 0
+    );
+
+    return (
+        <header
+            className={[
+                'fixed top-0 right-0 left-0 z-30 flex h-14 sm:h-16 items-center justify-between border-b bg-background px-2 sm:px-4 md:px-6 transition-all duration-300',
+                // Only offset on desktop; keep full-width on mobile.
+                isCollapsed ? 'lg:left-16' : 'lg:left-64',
+            ].join(' ')}
+        >
+            {/* Left Side - Mobile Menu & Module Name */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 pr-2 sm:pr-4 md:pr-6">
+                {/* Mobile Menu Button */}
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="lg:hidden h-9 w-9 sm:h-10 sm:w-10"
+                        >
+                            <Menu className="h-5 w-5" />
+                            <span className="sr-only">Open menu</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-64 p-0">
+                        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                        <MobileSidebar />
+                    </SheetContent>
+                </Sheet>
+
+                {/* Module Name */}
+                <h2 className="text-sm sm:text-base md:text-lg font-semibold truncate">
+                    {getModuleName()}
+                </h2>
+            </div>
+
+            {/* Right Side - Menu, Notification, User */}
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
+                {/* Language Switcher */}
+                <LanguageSwitcher />
+
+                {/* Theme Toggle */}
+                <ThemeToggle />
+
+                {/* Notifications */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="relative h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center"
+                        >
+                            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-destructive text-[9px] sm:text-[10px] font-medium text-destructive-foreground flex items-center justify-center min-w-[16px] sm:min-w-[20px] px-0.5">
+                                    {notificationCount > 99 ? '99+' : notificationCount}
+                                </span>
+                            )}
+                            <span className="sr-only">Notifications</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                        className="w-[calc(100vw-1rem)] sm:w-80 md:w-96 max-h-[80vh] overflow-y-auto z-50" 
+                        align={isMobile ? "center" : "end"}
+                        sideOffset={8}
+                        alignOffset={isMobile ? 0 : -8}
+                        collisionPadding={isMobile ? 8 : 0}
+                    >
+                        <DropdownMenuLabel className="flex items-center justify-between">
+                            <span>Notifications</span>
+                            {notificationCount > 0 && (
+                                <Badge variant="destructive" className="ml-2">
+                                    {notificationCount}
+                                </Badge>
+                            )}
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        
+                        {overdueDeals.length === 0 && upcomingDeals.length === 0 ? (
+                            <div className="p-6 flex items-center justify-center">
+                                <p className="text-sm text-muted-foreground text-center">
+                                    No pending notifications
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                {overdueDeals.length > 0 && (
+                                    <>
+                                        <DropdownMenuLabel className="text-xs text-destructive font-semibold">
+                                            Overdue Payments ({overdueDeals.length})
+                                        </DropdownMenuLabel>
+                                        {overdueDeals.slice(0, 5).map((deal) => (
+                                            <DropdownMenuItem
+                                                key={deal.id}
+                                                className="flex flex-col items-start gap-1 p-2 sm:p-3 cursor-pointer focus:bg-destructive/10"
+                                                onClick={() => {
+                                                    router.push(`/dashboard/deals/${deal.id}`);
+                                                }}
+                                                onSelect={(e) => e.preventDefault()}
+                                            >
+                                                <div className="flex items-start gap-2 w-full">
+                                                    <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium truncate">
+                                                            {deal.customer_name}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground truncate">
+                                                            {deal.vehicle_make} {deal.vehicle_model}
+                                                        </p>
+                                                        <p className="text-xs font-semibold text-destructive mt-1">
+                                                            PKR {deal.remaining_amount.toLocaleString()} overdue
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </DropdownMenuItem>
+                                        ))}
+                                        {overdueDeals.length > 5 && (
+                                            <DropdownMenuItem
+                                                className="text-center text-xs text-muted-foreground"
+                                                onClick={() => router.push('/dashboard/deals/pending?filter=overdue')}
+                                                onSelect={(e) => e.preventDefault()}
+                                            >
+                                                View {overdueDeals.length - 5} more overdue deals
+                                            </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuSeparator />
+                                    </>
+                                )}
+
+                                {upcomingDeals.length > 0 && (
+                                    <>
+                                        <DropdownMenuLabel className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
+                                            Upcoming Payments ({upcomingDeals.length})
+                                        </DropdownMenuLabel>
+                                        {upcomingDeals.slice(0, 5).map((deal) => (
+                                            <DropdownMenuItem
+                                                key={deal.id}
+                                                className="flex flex-col items-start gap-1 p-2 sm:p-3 cursor-pointer focus:bg-amber-50 dark:focus:bg-amber-950"
+                                                onClick={() => {
+                                                    router.push(`/dashboard/deals/${deal.id}`);
+                                                }}
+                                                onSelect={(e) => e.preventDefault()}
+                                            >
+                                                <div className="flex items-start gap-2 w-full">
+                                                    <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium truncate">
+                                                            {deal.customer_name}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground truncate">
+                                                            {deal.vehicle_make} {deal.vehicle_model}
+                                                        </p>
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
+                                                            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                                                PKR {deal.remaining_amount.toLocaleString()}
+                                                            </p>
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {deal.days_until_payment === 0
+                                                                    ? 'Due today'
+                                                                    : deal.days_until_payment === 1
+                                                                      ? 'Due tomorrow'
+                                                                      : `Due in ${deal.days_until_payment} days`}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </DropdownMenuItem>
+                                        ))}
+                                        {upcomingDeals.length > 5 && (
+                                            <DropdownMenuItem
+                                                className="text-center text-xs text-muted-foreground"
+                                                onClick={() => router.push('/dashboard/deals/pending?filter=upcoming')}
+                                            >
+                                                View {upcomingDeals.length - 5} more upcoming deals
+                                            </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuSeparator />
+                                    </>
+                                )}
+
+                                <DropdownMenuItem
+                                    className="text-center justify-center font-medium"
+                                    onClick={() => router.push('/dashboard/deals/pending')}
+                                    onSelect={(e) => e.preventDefault()}
+                                >
+                                    <span>View All Pending Deals</span>
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* User Menu */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full">
+                            <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+                                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                                <AvatarFallback className="text-xs sm:text-sm">{initials}</AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 z-50" align="end" forceMount>
+                        <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium leading-none">{profile?.full_name}</p>
+                                <p className="text-xs leading-none text-muted-foreground capitalize">
+                                    {profile?.role}
+                                </p>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+                            <User className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Settings</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        </header>
+    );
+}

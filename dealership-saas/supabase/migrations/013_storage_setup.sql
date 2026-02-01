@@ -1,0 +1,153 @@
+-- =============================================================================
+-- MIGRATION 013: Storage Buckets & RLS Policies
+-- =============================================================================
+-- This migration creates storage buckets and sets up RLS policies for:
+-- - vehicles: Public bucket for vehicle images
+-- - documents: Private bucket for sensitive documents
+-- - profiles: Public bucket for user profile pictures
+-- =============================================================================
+
+-- Note: Storage buckets are created via Supabase dashboard/API
+-- This file documents the policies to be applied via the dashboard
+
+-- =============================================================================
+-- BUCKET: vehicles (Public vehicle images)
+-- =============================================================================
+-- Storage path: storage.buckets
+-- Bucket name: vehicles
+-- Public: true
+-- Max file size: 100 MB
+-- Allowed MIME types: image/*
+--
+-- RLS Policies to create in dashboard:
+--
+-- 1. SELECT Policy - Anyone can view vehicle images
+--    Target: Select
+--    Auth: No requirement (public read)
+--    Expression: true
+--
+-- 2. INSERT Policy - Authenticated users can upload to their org
+--    Target: Insert
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'vehicles' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+--
+-- 3. UPDATE Policy - Users can update their org's images
+--    Target: Update
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'vehicles' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+--
+-- 4. DELETE Policy - Users can delete their org's images
+--    Target: Delete
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'vehicles' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+
+-- =============================================================================
+-- BUCKET: documents (Private documents)
+-- =============================================================================
+-- Storage path: storage.buckets
+-- Bucket name: documents
+-- Public: false
+-- Max file size: 50 MB
+-- Allowed MIME types: 
+--   - application/pdf
+--   - application/msword
+--   - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+--   - image/*
+--
+-- RLS Policies to create in dashboard:
+--
+-- 1. SELECT Policy - Users can view documents from their org
+--    Target: Select
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'documents' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+--
+-- 2. INSERT Policy - Authenticated users can upload to their org
+--    Target: Insert
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'documents' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+--
+-- 3. UPDATE Policy - Users can update their org's documents
+--    Target: Update
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'documents' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+--
+-- 4. DELETE Policy - Users can delete their org's documents
+--    Target: Delete
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'documents' AND 
+--                 (auth.jwt() -> 'app_metadata' -> 'organization_id')::text = 
+--                 (storage.foldername(name))[1])
+
+-- =============================================================================
+-- BUCKET: profiles (User profile pictures)
+-- =============================================================================
+-- Storage path: storage.buckets
+-- Bucket name: profiles
+-- Public: true
+-- Max file size: 10 MB
+-- Allowed MIME types: image/*
+--
+-- RLS Policies to create in dashboard:
+--
+-- 1. SELECT Policy - Anyone can view profile pictures
+--    Target: Select
+--    Auth: No requirement (public read)
+--    Expression: true
+--
+-- 2. INSERT Policy - Users can upload their own profile picture
+--    Target: Insert
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'profiles' AND 
+--                 (storage.foldername(name))[1] = auth.uid()::text)
+--
+-- 3. UPDATE Policy - Users can update their own profile picture
+--    Target: Update
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'profiles' AND 
+--                 (storage.foldername(name))[1] = auth.uid()::text)
+--
+-- 4. DELETE Policy - Users can delete their own profile picture
+--    Target: Delete
+--    Auth: (auth.uid() IS NOT NULL)
+--    Expression: (bucket_id = 'profiles' AND 
+--                 (storage.foldername(name))[1] = auth.uid()::text)
+
+-- =============================================================================
+-- BUCKET STRUCTURE - Recommended file organization
+-- =============================================================================
+--
+-- vehicles/
+--   {organization_id}/{vehicle_id}/image_1.jpg
+--   {organization_id}/{vehicle_id}/image_2.jpg
+--
+-- documents/
+--   {organization_id}/{entity_type}/{entity_id}/document.pdf
+--   {organization_id}/japan-import/{import_case_id}/grade_sheet.pdf
+--
+-- profiles/
+--   {user_id}/avatar.jpg
+
+-- =============================================================================
+-- NOTES FOR IMPLEMENTATION
+-- =============================================================================
+-- 1. Create buckets in Supabase dashboard (Storage > New Bucket)
+-- 2. Configure public/private settings
+-- 3. Set max file sizes
+-- 4. Add CORS configuration if needed
+-- 5. Apply RLS policies via Storage > Edit Policies
+-- 6. Test with different user roles (salesperson, admin, manager)
+-- 7. Monitor storage usage in Supabase dashboard
+
+-- Storage setup is complete. Apply policies via Supabase dashboard.
