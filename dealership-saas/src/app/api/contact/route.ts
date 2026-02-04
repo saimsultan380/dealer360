@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const TO_EMAIL = "saimsultan380@gmail.com";
 
 export async function POST(req: Request) {
@@ -28,6 +27,8 @@ export async function POST(req: Request) {
       );
     }
 
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     const subject = `New Dealer 360 enquiry from ${name}`;
 
     const lines = [
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
     ].filter(Boolean) as string[];
 
     await resend.emails.send({
-      from: "Dealer 360 <notifications@your-domain.com>",
+      from: "Dealer 360 <onboarding@resend.dev>",
       to: TO_EMAIL,
       subject,
       text: lines.join("\n"),
