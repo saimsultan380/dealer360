@@ -42,11 +42,13 @@ export default async function OrganizationDetailPage({
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 min-w-0">
         <Link href="/admin/organizations">
-          <Button variant="outline">← Back</Button>
+          <Button variant="outline" className="w-full sm:w-auto">
+            ← Back
+          </Button>
         </Link>
-        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="min-w-0 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive break-words">
           {error}
         </div>
       </div>
@@ -57,14 +59,16 @@ export default async function OrganizationDetailPage({
   const stats = statsRes.data;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">{org?.name}</h1>
-          <p className="text-muted-foreground">
+    <div className="space-y-6 min-w-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 flex-1 space-y-1">
+          <h1 className="text-xl font-bold tracking-tight truncate sm:text-2xl md:text-3xl">
+            {org?.name}
+          </h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
             Organization management and module configuration.
           </p>
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-1.5 pt-2 sm:gap-2">
             <Badge
               variant="secondary"
               className={statusColors[org.subscription_status] ?? ""}
@@ -80,27 +84,31 @@ export default async function OrganizationDetailPage({
           </div>
         </div>
 
-        <Link href="/admin/organizations">
-          <Button variant="outline">← Back</Button>
-        </Link>
+        <div className="w-full shrink-0 sm:w-auto">
+          <Link href="/admin/organizations">
+            <Button variant="outline" className="w-full sm:w-auto">
+              ← Back
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 items-start">
-        <Card className="lg:col-span-1">
-          <CardHeader>
+      <div className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-3 items-start">
+        <Card className="min-w-0 lg:col-span-1">
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle>Overview</CardTitle>
             <CardDescription>Basic organization details</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div>
+          <CardContent className="space-y-2 text-sm min-w-0 px-4 sm:px-6">
+            <div className="break-words">
               <span className="text-muted-foreground">City:</span>{" "}
               {org.city ?? "-"}
             </div>
-            <div>
+            <div className="break-all">
               <span className="text-muted-foreground">Phone:</span>{" "}
               {org.phone ?? "-"}
             </div>
-            <div>
+            <div className="break-all">
               <span className="text-muted-foreground">Email:</span>{" "}
               {org.email ?? "-"}
             </div>
@@ -128,9 +136,7 @@ export default async function OrganizationDetailPage({
                   {stats.completed_payments} payments)
                 </div>
                 <div>
-                  <span className="text-muted-foreground">
-                    Pending amount:
-                  </span>{" "}
+                  <span className="text-muted-foreground">Pending amount:</span>{" "}
                   PKR {stats.pending_amount.toLocaleString()} (
                   {stats.pending_payments} pending)
                 </div>
@@ -148,24 +154,27 @@ export default async function OrganizationDetailPage({
           </CardContent>
         </Card>
 
-        <div className="space-y-4 lg:col-span-2">
+        <div className="min-w-0 space-y-4 lg:col-span-2">
           <OrganizationEditor organization={org} />
 
-          <Card>
-            <CardHeader>
+          <Card className="min-w-0 overflow-hidden">
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle>Payment history</CardTitle>
               <CardDescription>
                 All subscription payments for this organization.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               {payments.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No payments found for this organization.
                 </p>
               ) : (
-                <div className="rounded-md border overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                <div
+                  className="min-w-0 w-full overflow-x-auto rounded-md border"
+                  style={{ WebkitOverflowScrolling: "touch" }}
+                >
+                  <table className="min-w-[640px] w-full text-sm">
                     <thead>
                       <tr className="border-b bg-muted/40 text-left">
                         <th className="px-3 py-2">Date</th>
@@ -182,9 +191,7 @@ export default async function OrganizationDetailPage({
                           <td className="px-3 py-2 text-muted-foreground">
                             {new Date(p.created_at).toLocaleString()}
                           </td>
-                          <td className="px-3 py-2 capitalize">
-                            {p.status}
-                          </td>
+                          <td className="px-3 py-2 capitalize">{p.status}</td>
                           <td className="px-3 py-2 text-right font-medium">
                             {p.currency ?? "PKR"}{" "}
                             {Number(p.amount ?? 0).toLocaleString()}
@@ -197,10 +204,7 @@ export default async function OrganizationDetailPage({
                                 {new Date(
                                   p.period_start
                                 ).toLocaleDateString()}{" "}
-                                -{" "}
-                                {new Date(
-                                  p.period_end
-                                ).toLocaleDateString()}
+                                - {new Date(p.period_end).toLocaleDateString()}
                               </>
                             )}
                           </td>
