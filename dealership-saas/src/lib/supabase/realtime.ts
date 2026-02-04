@@ -1,7 +1,10 @@
-'use client';
+"use client";
 
-import { createClient } from '@supabase/supabase-js';
-import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
+import type {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from "@supabase/supabase-js";
 
 /**
  * Realtime subscription manager for live data updates
@@ -11,7 +14,7 @@ import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/
 interface SubscriptionConfig {
   schema?: string;
   table: string;
-  event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+  event?: "INSERT" | "UPDATE" | "DELETE" | "*";
   filter?: string;
 }
 
@@ -46,8 +49,8 @@ class RealtimeManager {
     subscriptionId: string = `${config.table}_${Date.now()}_${Math.random()}`
   ): () => void {
     const channelName = `realtime_${subscriptionId}`;
-    const schema = config.schema || 'public';
-    const event = config.event || '*';
+    const schema = config.schema || "public";
+    const event = config.event || "*";
 
     // Create channel
     const channel = this.supabase.channel(channelName);
@@ -55,7 +58,7 @@ class RealtimeManager {
     // Subscribe to changes
     channel
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
           event: event as any,
           schema,
@@ -64,31 +67,36 @@ class RealtimeManager {
         },
         (payload: RealtimePostgresChangesPayload<any>) => {
           try {
-            if (payload.eventType === 'INSERT' && callbacks.onInsert) {
+            if (payload.eventType === "INSERT" && callbacks.onInsert) {
               callbacks.onInsert(payload);
-            } else if (payload.eventType === 'UPDATE' && callbacks.onUpdate) {
+            } else if (payload.eventType === "UPDATE" && callbacks.onUpdate) {
               callbacks.onUpdate(payload);
-            } else if (payload.eventType === 'DELETE' && callbacks.onDelete) {
+            } else if (payload.eventType === "DELETE" && callbacks.onDelete) {
               callbacks.onDelete(payload);
             }
           } catch (error) {
-            console.error(`Realtime callback error for ${config.table}:`, error);
-            callbacks.onError?.(error instanceof Error ? error : new Error(String(error)));
+            console.error(
+              `Realtime callback error for ${config.table}:`,
+              error
+            );
+            callbacks.onError?.(
+              error instanceof Error ? error : new Error(String(error))
+            );
           }
         }
       )
       .subscribe((status) => {
-        if (status === 'CLOSED') {
+        if (status === "CLOSED") {
           // Normal lifecycle during navigation/unmount.
           return;
-        } else if (status === 'CHANNEL_ERROR') {
+        } else if (status === "CHANNEL_ERROR") {
           // Don't spam the console. This commonly happens when Realtime is not enabled
           // for the project's tables (Database → Replication → Realtime).
           if (!this.warnedChannelError) {
             this.warnedChannelError = true;
             // One-time, actionable hint for developers.
             console.warn(
-              'Supabase Realtime channel error. If this persists, enable Realtime for your tables in Supabase (Database → Replication → Realtime) and ensure the tables are added to the realtime publication.'
+              "Supabase Realtime channel error. If this persists, enable Realtime for your tables in Supabase (Database → Replication → Realtime) and ensure the tables are added to the realtime publication."
             );
           }
           callbacks.onError?.(
@@ -96,7 +104,7 @@ class RealtimeManager {
               `Realtime channel error for ${schema}.${config.table}. Check Supabase Realtime/Replication settings.`
             )
           );
-        } else if (status === 'SUBSCRIBED') {
+        } else if (status === "SUBSCRIBED") {
           // Keep quiet to avoid noisy consoles in app usage.
           return;
         }
@@ -165,7 +173,7 @@ export function useRealtimeSubscription<T = any>(
   callbacks: SubscriptionCallbacks,
   subscriptionId?: string
 ) {
-  const { useEffect } = require('react');
+  const { useEffect } = require("react");
   const manager = getRealtimeManager();
 
   useEffect(() => {
@@ -182,106 +190,133 @@ export function subscribeToVehicles(
   organizationId?: string
 ) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'vehicles',
-      event: '*',
+      table: "vehicles",
+      event: "*",
       filter,
     },
     callbacks,
-    `vehicles_${organizationId || 'all'}`
+    `vehicles_${organizationId || "all"}`
   );
 }
 
 /**
  * Subscribe to leads table changes
  */
-export function subscribeToLeads(callbacks: SubscriptionCallbacks, organizationId?: string) {
+export function subscribeToLeads(
+  callbacks: SubscriptionCallbacks,
+  organizationId?: string
+) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'leads',
-      event: '*',
+      table: "leads",
+      event: "*",
       filter,
     },
     callbacks,
-    `leads_${organizationId || 'all'}`
+    `leads_${organizationId || "all"}`
   );
 }
 
 /**
  * Subscribe to deals table changes
  */
-export function subscribeToDeals(callbacks: SubscriptionCallbacks, organizationId?: string) {
+export function subscribeToDeals(
+  callbacks: SubscriptionCallbacks,
+  organizationId?: string
+) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'deals',
-      event: '*',
+      table: "deals",
+      event: "*",
       filter,
     },
     callbacks,
-    `deals_${organizationId || 'all'}`
+    `deals_${organizationId || "all"}`
   );
 }
 
 /**
  * Subscribe to payments table changes
  */
-export function subscribeToPayments(callbacks: SubscriptionCallbacks, organizationId?: string) {
+export function subscribeToPayments(
+  callbacks: SubscriptionCallbacks,
+  organizationId?: string
+) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'payments',
-      event: '*',
+      table: "payments",
+      event: "*",
       filter,
     },
     callbacks,
-    `payments_${organizationId || 'all'}`
+    `payments_${organizationId || "all"}`
   );
 }
 
 /**
  * Subscribe to cash transactions changes
  */
-export function subscribeToCashTransactions(callbacks: SubscriptionCallbacks, organizationId?: string) {
+export function subscribeToCashTransactions(
+  callbacks: SubscriptionCallbacks,
+  organizationId?: string
+) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'cash_transactions',
-      event: '*',
+      table: "cash_transactions",
+      event: "*",
       filter,
     },
     callbacks,
-    `cash_transactions_${organizationId || 'all'}`
+    `cash_transactions_${organizationId || "all"}`
   );
 }
 
 /**
  * Subscribe to activity_logs table changes
  */
-export function subscribeToActivityLogs(callbacks: SubscriptionCallbacks, organizationId?: string) {
+export function subscribeToActivityLogs(
+  callbacks: SubscriptionCallbacks,
+  organizationId?: string
+) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'activity_logs',
-      event: '*',
+      table: "activity_logs",
+      event: "*",
       filter,
     },
     callbacks,
-    `activity_logs_${organizationId || 'all'}`
+    `activity_logs_${organizationId || "all"}`
   );
 }
 
@@ -293,16 +328,41 @@ export function subscribeToSales(
   organizationId?: string
 ) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'sales',
-      event: '*',
+      table: "sales",
+      event: "*",
       filter,
     },
     callbacks,
-    `sales_${organizationId || 'all'}`
+    `sales_${organizationId || "all"}`
+  );
+}
+
+/**
+ * Subscribe to client_transactions table changes
+ */
+export function subscribeToClientTransactions(
+  callbacks: SubscriptionCallbacks,
+  organizationId?: string
+) {
+  const manager = getRealtimeManager();
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
+
+  return manager.subscribe(
+    {
+      table: "client_transactions",
+      event: "*",
+      filter,
+    },
+    callbacks,
+    `client_transactions_${organizationId || "all"}`
   );
 }
 
@@ -314,16 +374,18 @@ export function subscribeToFinancingLoans(
   organizationId?: string
 ) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'financing_loans',
-      event: '*',
+      table: "financing_loans",
+      event: "*",
       filter,
     },
     callbacks,
-    `financing_loans_${organizationId || 'all'}`
+    `financing_loans_${organizationId || "all"}`
   );
 }
 
@@ -335,16 +397,18 @@ export function subscribeToJapanImportCases(
   organizationId?: string
 ) {
   const manager = getRealtimeManager();
-  const filter = organizationId ? `organization_id=eq.${organizationId}` : undefined;
+  const filter = organizationId
+    ? `organization_id=eq.${organizationId}`
+    : undefined;
 
   return manager.subscribe(
     {
-      table: 'japan_import_cases',
-      event: '*',
+      table: "japan_import_cases",
+      event: "*",
       filter,
     },
     callbacks,
-    `japan_import_cases_${organizationId || 'all'}`
+    `japan_import_cases_${organizationId || "all"}`
   );
 }
 
@@ -360,12 +424,54 @@ export function subscribeToNotifications(
 
   return manager.subscribe(
     {
-      table: 'notifications',
-      event: 'INSERT',
+      table: "notifications",
+      event: "INSERT",
       filter,
     },
     callbacks,
     `notifications_${userId}`
+  );
+}
+
+/**
+ * Subscribe to a specific client's updates
+ */
+export function subscribeToClient(
+  clientId: string,
+  callbacks: SubscriptionCallbacks
+) {
+  const manager = getRealtimeManager();
+  const filter = `id=eq.${clientId}`;
+
+  return manager.subscribe(
+    {
+      table: "clients",
+      event: "*",
+      filter,
+    },
+    callbacks,
+    `client_${clientId}`
+  );
+}
+
+/**
+ * Subscribe to client_transactions for a specific client
+ */
+export function subscribeToClientTransactionsForClient(
+  clientId: string,
+  callbacks: SubscriptionCallbacks
+) {
+  const manager = getRealtimeManager();
+  const filter = `client_id=eq.${clientId}`;
+
+  return manager.subscribe(
+    {
+      table: "client_transactions",
+      event: "*",
+      filter,
+    },
+    callbacks,
+    `client_transactions_${clientId}`
   );
 }
 
@@ -381,8 +487,8 @@ export function subscribeToVehicle(
 
   return manager.subscribe(
     {
-      table: 'vehicles',
-      event: 'UPDATE',
+      table: "vehicles",
+      event: "UPDATE",
       filter,
     },
     callbacks,
@@ -402,8 +508,8 @@ export function subscribeToJapanImportCase(
 
   return manager.subscribe(
     {
-      table: 'japan_import_cases',
-      event: '*',
+      table: "japan_import_cases",
+      event: "*",
       filter,
     },
     callbacks,

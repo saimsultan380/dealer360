@@ -106,7 +106,7 @@ export function EditSaleForm({ sale }: EditSaleFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Vehicle Info (Read-only) */}
             <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b">
+                <CardHeader className="bg-primary/10 border-b -mt-4 sm:-mt-6 px-6 py-5">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                             <Car className="h-5 w-5 text-primary" />
@@ -152,7 +152,7 @@ export function EditSaleForm({ sale }: EditSaleFormProps) {
 
             {/* Customer Details */}
             <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border-b">
+                <CardHeader className="bg-blue-500/10 border-b -mt-4 sm:-mt-6 px-6 py-5">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                             <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -214,7 +214,7 @@ export function EditSaleForm({ sale }: EditSaleFormProps) {
 
             {/* Sale Details */}
             <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border-b">
+                <CardHeader className="bg-emerald-500/10 border-b -mt-4 sm:-mt-6 px-6 py-5">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                             <ShoppingCart className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />

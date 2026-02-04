@@ -170,7 +170,7 @@ export async function getPendingDeals() {
             const metadata = paymentMetadata[deal.id] || {};
             const paymentDetails = metadata.paymentDetails || {};
 
-            const remainingAmount = paymentDetails.remainingAmount 
+            const remainingAmount = paymentDetails.remainingAmount
                 ? parseFloat(paymentDetails.remainingAmount)
                 : deal.sale_price - deal.down_payment;
 
@@ -254,6 +254,7 @@ export async function markDealAsPaid(dealId: string) {
 
         revalidatePath('/dashboard/deals');
         revalidatePath('/dashboard/deals/pending');
+        revalidatePath(`/dashboard/deals/${dealId}`);
         return { success: true };
     } catch (err) {
         console.error('Error in markDealAsPaid:', err);

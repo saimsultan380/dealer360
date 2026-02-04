@@ -410,6 +410,7 @@ export interface Investor {
   phone: string;
   cnic: string | null;
   address: string | null;
+  avatar_url?: string | null;
   status: InvestorStatus;
   notes: string | null;
   created_at: string;

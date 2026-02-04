@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
-import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export interface TradeInInput {
   make: string;
@@ -14,7 +14,7 @@ export interface TradeInInput {
   engine_number?: string;
   chassis_number?: string;
   mileage?: number;
-  condition?: 'new' | 'used' | 'certified';
+  condition?: "new" | "used" | "certified";
   agreed_value: number; // PKR
   expected_selling_price?: number; // optional target resale
   notes?: string;
@@ -26,9 +26,15 @@ export interface ExchangeSaleFormData {
   customer_phone: string;
   customer_cnic?: string;
   customer_address?: string;
+  customer_avatar_url?: string;
   sale_price: number; // price of showroom vehicle being sold
   down_payment: number; // cash paid now (excluding trade-in)
-  payment_method: 'cash' | 'bank_transfer' | 'easypaisa' | 'jazzcash' | 'financing';
+  payment_method:
+    | "cash"
+    | "bank_transfer"
+    | "easypaisa"
+    | "jazzcash"
+    | "financing";
   deal_date: string;
   delivery_date?: string;
   salesperson_id?: string;
@@ -38,7 +44,9 @@ export interface ExchangeSaleFormData {
 }
 
 function toBase64Json(data: unknown) {
-  return `data:application/json;base64,${Buffer.from(JSON.stringify(data)).toString('base64')}`;
+  return `data:application/json;base64,${Buffer.from(
+    JSON.stringify(data)
+  ).toString("base64")}`;
 }
 
 /**
@@ -55,11 +63,13 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
   if (
     !supabaseUrl ||
     !supabaseAnonKey ||
-    supabaseUrl.includes('your-project-id.supabase.co')
+    supabaseUrl.includes("your-project-id.supabase.co")
   ) {
-    console.warn('⚠️ Supabase not configured. Create exchange sale is simulated.');
-    revalidatePath('/dashboard/sales');
-    redirect('/dashboard/sales');
+    console.warn(
+      "⚠️ Supabase not configured. Create exchange sale is simulated."
+    );
+    revalidatePath("/dashboard/sales");
+    redirect("/dashboard/sales");
     return;
   }
 
@@ -67,22 +77,25 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+  if (!user) throw new Error("Unauthorized");
 
   const { data: profile } = await supabase
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", user.id)
     .single();
-  if (!profile?.organization_id) throw new Error('No organization found');
+  if (!profile?.organization_id) throw new Error("No organization found");
 
   const tradeInValue = Number(data.trade_in.agreed_value || 0);
   const netTotal = Math.max(0, Number(data.sale_price || 0) - tradeInValue);
-  const remainingAmount = Math.max(0, netTotal - Number(data.down_payment || 0));
+  const remainingAmount = Math.max(
+    0,
+    netTotal - Number(data.down_payment || 0)
+  );
 
   // 1) Create the deal record (store full sale_price; net totals are stored in metadata)
   const { data: deal, error: dealError } = await supabase
-    .from('deals')
+    .from("deals")
     .insert({
       organization_id: profile.organization_id,
       vehicle_id: data.vehicle_id,
@@ -93,7 +106,7 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
       sale_price: data.sale_price,
       down_payment: data.down_payment,
       payment_method: data.payment_method,
-      status: remainingAmount > 0 ? 'pending' : 'completed',
+      status: remainingAmount > 0 ? "pending" : "completed",
       deal_date: data.deal_date || new Date().toISOString(),
       delivery_date: data.delivery_date || null,
       salesperson_id: data.salesperson_id || null,
@@ -104,17 +117,20 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
     .single();
 
   if (dealError) {
-    console.error('Error creating exchange deal:', dealError);
-    throw new Error('Failed to create exchange deal');
+    console.error("Error creating exchange deal:", dealError);
+    throw new Error("Failed to create exchange deal");
   }
 
   // 2) Update sold vehicle status
-  const vehicleStatus = remainingAmount > 0 ? 'reserved' : 'sold';
-  await supabase.from('vehicles').update({ status: vehicleStatus }).eq('id', data.vehicle_id);
+  const vehicleStatus = remainingAmount > 0 ? "reserved" : "sold";
+  await supabase
+    .from("vehicles")
+    .update({ status: vehicleStatus })
+    .eq("id", data.vehicle_id);
 
   // 3) Create trade-in inventory vehicle
   const { data: tradeInVehicle, error: tradeInError } = await supabase
-    .from('vehicles')
+    .from("vehicles")
     .insert({
       organization_id: profile.organization_id,
       make: data.trade_in.make,
@@ -126,10 +142,10 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
       engine_number: data.trade_in.engine_number || null,
       chassis_number: data.trade_in.chassis_number || null,
       mileage: data.trade_in.mileage ?? null,
-      condition: data.trade_in.condition || 'used',
+      condition: data.trade_in.condition || "used",
       purchase_price: tradeInValue,
       selling_price: data.trade_in.expected_selling_price ?? null,
-      status: 'available',
+      status: "available",
       description:
         data.trade_in.notes ||
         `Trade-in from ${data.customer_name} (${data.customer_phone}) for deal ${deal.id}`,
@@ -139,27 +155,27 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
     .single();
 
   if (tradeInError) {
-    console.error('Error creating trade-in vehicle:', tradeInError);
+    console.error("Error creating trade-in vehicle:", tradeInError);
     // best-effort: deal exists, still proceed (metadata will omit vehicle link)
   }
 
   // 4) Upsert deal metadata document (single JSON per deal)
   try {
     await supabase
-      .from('documents')
+      .from("documents")
       .delete()
-      .eq('organization_id', profile.organization_id)
-      .eq('entity_type', 'deal')
-      .eq('entity_id', deal.id)
-      .eq('document_type', 'other')
-      .eq('file_name', 'deal_metadata.json');
+      .eq("organization_id", profile.organization_id)
+      .eq("entity_type", "deal")
+      .eq("entity_id", deal.id)
+      .eq("document_type", "other")
+      .eq("file_name", "deal_metadata.json");
 
-    await supabase.from('documents').insert({
+    await supabase.from("documents").insert({
       organization_id: profile.organization_id,
-      entity_type: 'deal',
+      entity_type: "deal",
       entity_id: deal.id,
-      document_type: 'other',
-      file_name: 'deal_metadata.json',
+      document_type: "other",
+      file_name: "deal_metadata.json",
       file_url: toBase64Json({
         paymentDetails: {
           isExchange: true,
@@ -176,49 +192,56 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
       uploaded_by: user.id,
     });
   } catch (e) {
-    console.error('Error storing exchange metadata:', e);
+    console.error("Error storing exchange metadata:", e);
   }
 
   // 5) Create/find client and write transactions (purchase + sale)
   try {
     const { data: existingClient } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('organization_id', profile.organization_id)
-      .eq('phone', data.customer_phone)
+      .from("clients")
+      .select("id")
+      .eq("organization_id", profile.organization_id)
+      .eq("phone", data.customer_phone)
       .single();
 
     let clientId = existingClient?.id;
 
     if (!clientId) {
       const { data: newClient } = await supabase
-        .from('clients')
+        .from("clients")
         .insert({
           organization_id: profile.organization_id,
           name: data.customer_name,
           phone: data.customer_phone,
           cnic: data.customer_cnic || null,
           address: data.customer_address || null,
-          status: 'active',
+          avatar_url: data.customer_avatar_url || null,
+          status: "active",
         })
         .select()
         .single();
       clientId = newClient?.id;
+    } else if (data.customer_avatar_url) {
+      await supabase
+        .from("clients")
+        .update({ avatar_url: data.customer_avatar_url })
+        .eq("id", clientId)
+        .eq("organization_id", profile.organization_id);
     }
 
     if (clientId) {
       // Purchase: client buys showroom vehicle (netTotal is what they owe after trade-in)
-      await supabase.from('client_transactions').insert({
+      await supabase.from("client_transactions").insert({
         organization_id: profile.organization_id,
         client_id: clientId,
         deal_id: deal.id,
-        transaction_type: 'purchase',
+        transaction_type: "purchase",
         amount: netTotal,
-        currency: 'PKR',
+        currency: "PKR",
         payment_method: data.payment_method,
         vehicle_id: data.vehicle_id,
         transaction_date: data.deal_date || new Date().toISOString(),
-        status: remainingAmount > 0 ? 'pending' : 'completed',
+        status: remainingAmount > 0 ? "pending" : "completed",
         total_amount: netTotal,
         paid_amount: Number(data.down_payment || 0),
         remaining_due: remainingAmount,
@@ -228,33 +251,32 @@ export async function createExchangeSale(data: ExchangeSaleFormData) {
 
       // Sale: client sells trade-in vehicle to showroom
       if (tradeInValue > 0) {
-        await supabase.from('client_transactions').insert({
+        await supabase.from("client_transactions").insert({
           organization_id: profile.organization_id,
           client_id: clientId,
           deal_id: deal.id,
-          transaction_type: 'sale',
+          transaction_type: "sale",
           amount: tradeInValue,
-          currency: 'PKR',
+          currency: "PKR",
           payment_method: data.payment_method,
           vehicle_id: tradeInVehicle?.id ?? null,
           vehicle_make: data.trade_in.make,
           vehicle_model: data.trade_in.model,
           vehicle_year: data.trade_in.year,
           transaction_date: data.deal_date || new Date().toISOString(),
-          status: 'completed',
+          status: "completed",
           notes: `Trade-in vehicle received: deal=${deal.id}`,
           created_by: user.id,
         });
       }
     }
   } catch (e) {
-    console.error('Error creating client transactions for exchange:', e);
+    console.error("Error creating client transactions for exchange:", e);
   }
 
-  revalidatePath('/dashboard/sales');
-  revalidatePath('/dashboard/inventory');
-  revalidatePath('/dashboard/clients');
-  revalidatePath('/dashboard/deals/pending');
-  redirect('/dashboard/sales');
+  revalidatePath("/dashboard/sales");
+  revalidatePath("/dashboard/inventory");
+  revalidatePath("/dashboard/clients");
+  revalidatePath("/dashboard/deals/pending");
+  redirect("/dashboard/sales");
 }
-

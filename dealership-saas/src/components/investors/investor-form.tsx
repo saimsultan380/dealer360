@@ -16,8 +16,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Loader2, Upload, X } from 'lucide-react';
 import { createInvestor, updateInvestor, InvestorFormData, getInvestorById } from '@/lib/actions/investors';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { useFormattedInput } from '@/lib/hooks/use-formatted-input';
 
 const investorSchema = z.object({
@@ -42,6 +44,8 @@ export function InvestorForm({ investorId }: InvestorFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(!!investorId);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
 
     const {
         register,
@@ -94,9 +98,56 @@ export function InvestorForm({ investorId }: InvestorFormProps) {
             setValue('address', result.data.address || '');
             setValue('status', result.data.status);
             setValue('notes', result.data.notes || '');
+            setAvatarUrl(result.data.avatar_url ?? null);
         }
         setLoading(false);
     };
+
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            setError('Please upload an image file');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Image size must be less than 5MB');
+            return;
+        }
+        setUploading(true);
+        setError(null);
+        try {
+            const supabase = createSupabaseClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                setError('Unauthorized');
+                setUploading(false);
+                return;
+            }
+            const fileExt = file.name.split('.').pop();
+            const fileName = `investor-avatar-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+            const filePath = `investor-avatars/${fileName}`;
+            const { error: uploadError } = await supabase.storage
+                .from('vehicles')
+                .upload(filePath, file, { upsert: false });
+            if (uploadError) {
+                setError('Failed to upload image');
+                setUploading(false);
+                return;
+            }
+            const { data: { publicUrl } } = supabase.storage.from('vehicles').getPublicUrl(filePath);
+            setAvatarUrl(publicUrl);
+        } catch (err) {
+            setError('Failed to upload image');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const removeAvatar = () => setAvatarUrl(null);
+
+    const getInitials = (name: string) =>
+        name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
     const onSubmit = async (data: InvestorFormValues) => {
         setIsSubmitting(true);
@@ -109,6 +160,7 @@ export function InvestorForm({ investorId }: InvestorFormProps) {
                 phone: data.phone,
                 cnic: data.cnic || undefined,
                 address: data.address || undefined,
+                avatar_url: avatarUrl || undefined,
                 status: data.status,
                 notes: data.notes || undefined,
             };
@@ -150,6 +202,51 @@ export function InvestorForm({ investorId }: InvestorFormProps) {
                     {error}
                 </div>
             )}
+
+            {/* Avatar Upload */}
+            <div className="flex items-center gap-6">
+                <Avatar className="h-24 w-24">
+                    <AvatarImage src={avatarUrl || undefined} alt={watch('name') || 'Investor'} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                        {watch('name') ? getInitials(watch('name')) : 'IN'}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploading}
+                        onClick={() => document.getElementById('investor-avatar')?.click()}
+                    >
+                        {uploading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading...
+                            </>
+                        ) : (
+                            <>
+                                <Upload className="mr-2 h-4 w-4" />
+                                {avatarUrl ? 'Change Photo' : 'Upload Photo'}
+                            </>
+                        )}
+                    </Button>
+                    <Input
+                        id="investor-avatar"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarUpload}
+                        disabled={uploading}
+                    />
+                    {avatarUrl && (
+                        <Button type="button" variant="ghost" size="sm" onClick={removeAvatar} className="text-muted-foreground">
+                            <X className="mr-2 h-4 w-4" />
+                            Remove
+                        </Button>
+                    )}
+                </div>
+            </div>
 
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">

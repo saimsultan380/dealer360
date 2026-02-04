@@ -363,7 +363,7 @@ export default function DashboardClient() {
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-80">
               <DropdownMenuItem onClick={() => router.push('/dashboard/inventory/new')}>
                 <Car className="mr-2 h-4 w-4" />
                 {t('dashboard.addVehicle')}

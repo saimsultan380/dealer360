@@ -138,35 +138,34 @@ export function VehiclesTable({ vehicles: initialVehicles, pagination }: Vehicle
             {/* Realtime Connection Indicator */}
             <div className="flex items-center gap-2 text-sm">
                 <div
-                    className={`h-2 w-2 rounded-full ${
-                        realtimeStatus === 'connected'
-                            ? 'bg-green-500'
-                            : realtimeStatus === 'error'
-                              ? 'bg-red-500'
-                              : 'bg-yellow-500'
-                    }`}
+                    className={`h-2 w-2 rounded-full ${realtimeStatus === 'connected'
+                        ? 'bg-green-500'
+                        : realtimeStatus === 'error'
+                            ? 'bg-red-500'
+                            : 'bg-yellow-500'
+                        }`}
                     aria-label={`Realtime connection: ${realtimeStatus}`}
                 />
                 <span className="text-muted-foreground">
                     {realtimeStatus === 'connected'
                         ? 'Live updates enabled'
                         : realtimeStatus === 'error'
-                          ? 'Connection error'
-                          : 'Connecting...'}
+                            ? 'Connection error'
+                            : 'Connecting...'}
                 </span>
             </div>
 
             {/* Table */}
-            <div className="rounded-md border overflow-x-auto">
+            <div className="rounded-lg border bg-card overflow-hidden">
                 <Table className="min-w-full">
                     <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Image</TableHead>
-                            <TableHead>Vehicle Info</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Mileage</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                        <TableRow className="bg-muted/50 hover:bg-muted/50">
+                            <TableHead className="w-[120px] font-semibold">Image</TableHead>
+                            <TableHead className="font-semibold">Vehicle Info</TableHead>
+                            <TableHead className="font-semibold">Price</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">Mileage</TableHead>
+                            <TableHead className="text-right font-semibold">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -178,9 +177,13 @@ export function VehiclesTable({ vehicles: initialVehicles, pagination }: Vehicle
                             </TableRow>
                         ) : (
                             displayVehicles.map((vehicle: any) => (
-                                <TableRow key={vehicle.id}>
+                                <TableRow
+                                    key={vehicle.id}
+                                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                    onClick={() => router.push(`/dashboard/inventory/${vehicle.id}`)}
+                                >
                                     <TableCell>
-                                        <div className="relative h-12 w-20 overflow-hidden rounded-md bg-muted">
+                                        <div className="relative h-16 w-24 overflow-hidden rounded-lg bg-muted border">
                                             <Image
                                                 src={
                                                     vehicle.vehicle_images && vehicle.vehicle_images.length > 0
@@ -194,21 +197,21 @@ export function VehiclesTable({ vehicles: initialVehicles, pagination }: Vehicle
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="font-medium">
+                                        <div className="font-semibold text-base">
                                             {vehicle.year} {vehicle.make} {vehicle.model}
                                         </div>
-                                        <div className="text-sm text-muted-foreground">{vehicle.variant}</div>
+                                        <div className="text-sm text-muted-foreground mt-0.5">{vehicle.variant}</div>
                                     </TableCell>
-                                    <TableCell>PKR {(vehicle.selling_price || 0).toLocaleString()}</TableCell>
+                                    <TableCell className="font-medium">PKR {(vehicle.selling_price || 0).toLocaleString()}</TableCell>
                                     <TableCell>
-                                        <Badge variant="secondary" className={statusColors[vehicle.status]}>
-                                            {vehicle.status}
+                                        <Badge variant="secondary" className={`${statusColors[vehicle.status]} capitalize`}>
+                                            {vehicle.status.replace('_', ' ')}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{(vehicle.mileage || 0).toLocaleString()} km</TableCell>
+                                    <TableCell className="text-muted-foreground">{(vehicle.mileage || 0).toLocaleString()} km</TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
+                                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                                                 <Button variant="ghost" size="icon" className="h-8 w-8">
                                                     <MoreHorizontal className="h-4 w-4" />
                                                 </Button>
@@ -216,11 +219,11 @@ export function VehiclesTable({ vehicles: initialVehicles, pagination }: Vehicle
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => router.push(`/dashboard/inventory/${vehicle.id}`)}>
+                                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/inventory/${vehicle.id}`); }}>
                                                     <Eye className="mr-2 h-4 w-4" />
                                                     View Details
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => router.push(`/dashboard/inventory/${vehicle.id}/edit`)}>
+                                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/inventory/${vehicle.id}/edit`); }}>
                                                     <Pencil className="mr-2 h-4 w-4" />
                                                     Edit Vehicle
                                                 </DropdownMenuItem>
@@ -228,7 +231,7 @@ export function VehiclesTable({ vehicles: initialVehicles, pagination }: Vehicle
                                                 <DropdownMenuItem
                                                     className="text-destructive"
                                                     disabled={isDeleting === vehicle.id}
-                                                    onClick={() => handleDelete(vehicle.id)}
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(vehicle.id); }}
                                                 >
                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete

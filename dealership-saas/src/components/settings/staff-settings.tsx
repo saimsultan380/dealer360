@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -273,31 +273,52 @@ export function StaffSettings() {
                         <span className="text-muted-foreground text-xs">Customize</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-72 max-h-[60vh] overflow-auto">
-                      <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                        Choose which modules appear in the sidebar for this staff member.
+                    <DropdownMenuContent align="start" className="w-80 p-0">
+                      <div className="px-4 py-3 border-b bg-muted/40">
+                        <p className="text-sm font-medium">Module Access</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Toggle modules for this new staff member.
+                        </p>
                       </div>
-                      <DropdownMenuSeparator />
-                      {(Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]).map((key) => {
-                        const locked = key === 'dashboard' || key === 'settings';
-                        const selected = normalizeStaffModules(newStaff.modules);
-                        const checked = locked ? true : selected.includes(key);
-                        return (
-                          <DropdownMenuCheckboxItem
-                            key={key}
-                            checked={checked}
-                            disabled={saving || locked}
-                            onCheckedChange={(v) => {
-                              const current = new Set<StaffModuleKey>(selected);
-                              if (v) current.add(key);
-                              else current.delete(key);
-                              setNewStaff((s) => ({ ...s, modules: Array.from(current) }));
-                            }}
-                          >
-                            {STAFF_MODULE_LABELS[key]}
-                          </DropdownMenuCheckboxItem>
-                        );
-                      })}
+                      <div className="p-2 max-h-[60vh] overflow-y-auto space-y-1">
+                        {(Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]).map((key) => {
+                          const locked = key === 'dashboard' || key === 'settings';
+                          const selected = normalizeStaffModules(newStaff.modules);
+                          const checked = locked ? true : selected.includes(key);
+                          return (
+                            <div
+                              key={key}
+                              className={`flex items-center justify-between p-2 rounded-md hover:bg-muted/50 ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                              onClick={(e) => {
+                                if (locked) return;
+                                e.preventDefault();
+                                const current = new Set<StaffModuleKey>(selected);
+                                if (!checked) current.add(key);
+                                else current.delete(key);
+                                setNewStaff((s) => ({ ...s, modules: Array.from(current) }));
+                              }}
+                            >
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-sm font-medium">{STAFF_MODULE_LABELS[key]}</span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  {locked ? 'Required' : 'Enable access'}
+                                </span>
+                              </div>
+                              <Switch checked={checked} disabled={locked} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="p-2 border-t bg-muted/40">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-xs h-8"
+                          onClick={() => setNewStaff((s) => ({ ...s, modules: [] }))}
+                        >
+                          Clear all (except required)
+                        </Button>
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <p className="text-xs text-muted-foreground">
@@ -339,112 +360,136 @@ export function StaffSettings() {
         )}
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Modules</TableHead>
-            <TableHead>Active</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {staff.map((m) => (
-            <TableRow key={m.id}>
-              <TableCell className="font-medium">{m.full_name}</TableCell>
-              <TableCell className="text-muted-foreground">{m.email || '-'}</TableCell>
-              <TableCell className="capitalize">
-                {canManage ? (
-                  <Select
-                    value={m.role === 'super_admin' ? 'admin' : (m.role as any)}
-                    onValueChange={(v) =>
-                      onRoleChange(m.id, v as Exclude<UserRole, 'super_admin'>)
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-[160px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {roleOptions.map((r) => (
-                        <SelectItem key={r} value={r}>
-                          {r.replace('_', ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  m.role.replace('_', ' ')
-                )}
-              </TableCell>
-              <TableCell>
-                {canManage ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8">
-                        {(m as any)?.module_access?.length
-                          ? `${(m as any).module_access.length} selected`
-                          : 'Role default'}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-64 max-h-[60vh] overflow-auto">
-                      <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                        Select which modules appear for this staff member.
-                      </div>
-                      <DropdownMenuSeparator />
-                      {(Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]).map((key) => {
-                        const locked = key === 'dashboard' || key === 'settings';
-                        const selected: StaffModuleKey[] =
-                          ((m as any)?.module_access as StaffModuleKey[] | null) ?? [];
-                        const checked = locked ? true : selected.includes(key);
-                        return (
-                          <DropdownMenuCheckboxItem
-                            key={key}
-                            checked={checked}
-                            disabled={locked}
-                            onCheckedChange={(v) => {
-                              const current = new Set<StaffModuleKey>(selected);
-                              if (v) current.add(key);
-                              else current.delete(key);
-                              onModulesChange(m.id, Array.from(current));
-                            }}
-                          >
-                            {STAFF_MODULE_LABELS[key]}
-                          </DropdownMenuCheckboxItem>
-                        );
-                      })}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={!(m as any)?.module_access?.length}
-                        onCheckedChange={() => onModulesChange(m.id, null)}
-                      >
-                        Use role default (clear override)
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell>
-                <Switch
-                  checked={m.is_active}
-                  onCheckedChange={(v) => onActiveChange(m.id, v)}
-                  disabled={!canManage}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-
-          {staff.length === 0 && (
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[800px]">
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
-                No staff found.
-              </TableCell>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Modules</TableHead>
+              <TableHead>Active</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {staff.map((m) => (
+              <TableRow key={m.id}>
+                <TableCell className="font-medium">{m.full_name}</TableCell>
+                <TableCell className="text-muted-foreground">{m.email || '-'}</TableCell>
+                <TableCell className="capitalize">
+                  {canManage ? (
+                    <Select
+                      value={m.role === 'super_admin' ? 'admin' : (m.role as any)}
+                      onValueChange={(v) =>
+                        onRoleChange(m.id, v as Exclude<UserRole, 'super_admin'>)
+                      }
+                    >
+                      <SelectTrigger className="h-8 w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roleOptions.map((r) => (
+                          <SelectItem key={r} value={r}>
+                            {r.replace('_', ' ')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    m.role.replace('_', ' ')
+                  )}
+                </TableCell>
+                <TableCell>
+                  {canManage ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 w-full max-w-[140px] justify-between">
+                          <span className="truncate">
+                            {(m as any)?.module_access?.length
+                              ? `${(m as any).module_access.length} selected`
+                              : 'Default'}
+                          </span>
+                          <SlidersHorizontal className="h-3.5 w-3.5 ml-2 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-80 p-0">
+                        <div className="px-4 py-3 border-b bg-muted/40">
+                          <p className="text-sm font-medium">Module Access</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Toggle modules for {m.full_name}
+                          </p>
+                        </div>
+                        <div className="p-2 max-h-[60vh] overflow-y-auto space-y-1">
+                          {(Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]).map((key) => {
+                            const locked = key === 'dashboard' || key === 'settings';
+                            const selected: StaffModuleKey[] =
+                              ((m as any)?.module_access as StaffModuleKey[] | null) ?? [];
+                            const checked = locked ? true : selected.includes(key);
+                            return (
+                              <div
+                                key={key}
+                                className={`flex items-center justify-between p-2 rounded-md hover:bg-muted/50 ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                onClick={(e) => {
+                                  if (locked) return;
+                                  e.preventDefault();
+                                  const current = new Set<StaffModuleKey>(selected);
+                                  if (!checked) current.add(key);
+                                  else current.delete(key);
+                                  onModulesChange(m.id, Array.from(current));
+                                }}
+                              >
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-sm font-medium">{STAFF_MODULE_LABELS[key]}</span>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {locked ? 'Required' : 'Enable access'}
+                                  </span>
+                                </div>
+                                <Switch checked={checked} disabled={locked} />
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="p-2 border-t bg-muted/40">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full text-xs h-8"
+                            onClick={() => onModulesChange(m.id, null)}
+                          >
+                            Reset to role defaults
+                          </Button>
+                        </div>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={m.is_active}
+                      onCheckedChange={(v) => onActiveChange(m.id, v)}
+                      disabled={!canManage}
+                    />
+                    <span className="text-xs text-muted-foreground w-12">
+                      {m.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {staff.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                  No staff found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

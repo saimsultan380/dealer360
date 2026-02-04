@@ -1,12 +1,23 @@
 'use client';
 
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
-import { Sidebar, Header } from '@/components/layout';
-import { MobileBottomNav } from './mobile-bottom-nav';
 import { useSidebarStore, useAuthStore } from '@/lib/store';
 import { createClient } from '@/lib/supabase/client';
 import type { Profile, Organization } from '@/lib/types/database';
+
+// Avoid SSR for Radix-driven components to prevent hydration id mismatches.
+const Sidebar = dynamic(() => import('./sidebar').then((m) => m.Sidebar), {
+    ssr: false,
+});
+const Header = dynamic(() => import('./header').then((m) => m.Header), {
+    ssr: false,
+});
+const MobileBottomNav = dynamic(
+    () => import('./mobile-bottom-nav').then((m) => m.MobileBottomNav),
+    { ssr: false }
+);
 
 interface DashboardLayoutProps {
     children: React.ReactNode;

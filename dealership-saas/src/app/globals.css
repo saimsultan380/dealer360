@@ -141,3 +141,30 @@
 [dir="rtl"] .rtl\:text-left {
   text-align: left;
 }
+
+/* Landing page headings – Prata, weight 600 */
+.landing-page h1 {
+  font-family: var(--font-prata), Prata, sans-serif;
+  font-size: clamp(2rem, 5vw + 1.5rem, 58px);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+@media (min-width: 1024px) {
+  .landing-page h1 {
+    font-size: 58px;
+    line-height: 75.4px;
+  }
+}
+
+.landing-page h2 {
+  font-family: var(--font-prata), Prata, sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.landing-page h3,
+.landing-page h4 {
+  font-family: var(--font-prata), Prata, sans-serif;
+  font-weight: 600;
+}
