@@ -220,10 +220,13 @@ export function SalesTable({
         </span>
       </div>
 
-      <div className="rounded-xl border bg-card overflow-hidden">
-        {/* Desktop Table */}
-        <div className="hidden md:block overflow-x-auto">
-          <Table>
+      <div className="rounded-xl border bg-card overflow-hidden min-w-0">
+        {/* Table: horizontal scroll on mobile and small viewports */}
+        <div
+          className="w-full min-w-0 overflow-x-auto overflow-y-visible"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableHead className="w-[280px]">Vehicle</TableHead>
@@ -438,105 +441,6 @@ export function SalesTable({
               })}
             </TableBody>
           </Table>
-        </div>
-
-        {/* Mobile Card View */}
-        <div className="md:hidden divide-y">
-          {displaySales.map((sale: any) => {
-            const vehicle = sale.vehicles;
-            const status = statusConfig[sale.status] || statusConfig.pending;
-            const StatusIcon = status.icon;
-            const remainingAmount =
-              parseFloat(sale.sale_price) - parseFloat(sale.down_payment);
-            const primaryImage =
-              vehicle?.vehicle_images?.find((img: any) => img.is_primary) ||
-              vehicle?.vehicle_images?.[0];
-
-            return (
-              <div
-                key={sale.id}
-                className="p-4 hover:bg-muted/50 transition-colors"
-                onClick={() => router.push(`/dashboard/sales/${sale.id}`)}
-              >
-                <div className="flex gap-3">
-                  {/* Vehicle Image */}
-                  <div className="relative h-20 w-28 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    {primaryImage?.url ? (
-                      <Image
-                        src={primaryImage.url}
-                        alt={`${vehicle?.make} ${vehicle?.model}`}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                        <Car className="h-8 w-8 text-muted-foreground/50" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="font-medium truncate">
-                          {vehicle?.year} {vehicle?.make} {vehicle?.model}
-                        </p>
-                        {vehicle?.variant && (
-                          <p className="text-sm text-muted-foreground truncate">
-                            {vehicle.variant}
-                          </p>
-                        )}
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={cn("gap-1 flex-shrink-0", status.color)}
-                      >
-                        <StatusIcon className="h-3 w-3" />
-                        {status.label}
-                      </Badge>
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-2 text-sm">
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage
-                          src={
-                            getClientAvatarUrl(sale.client_avatar_url) ??
-                            undefined
-                          }
-                          alt={sale.customer_name || "Client"}
-                        />
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {sale.customer_name?.charAt(0)?.toUpperCase() || "C"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-muted-foreground truncate">
-                        {sale.customer_name}
-                      </span>
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="font-bold text-emerald-600 dark:text-emerald-400 font-figures tabular-nums">
-                        PKR {parseFloat(sale.sale_price).toLocaleString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(sale.deal_date).toLocaleDateString("en-PK", {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </p>
-                    </div>
-
-                    {remainingAmount > 0 && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-figures tabular-nums">
-                        Due: PKR {remainingAmount.toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
 

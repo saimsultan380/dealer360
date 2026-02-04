@@ -125,28 +125,30 @@ export default async function VehicleDetailPage({
 
     return (
       <div className="space-y-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div className="flex items-start gap-4 min-w-0">
-            <Link href="/dashboard/inventory">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+            <Link href="/dashboard/inventory" className="shrink-0">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold truncate">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold leading-tight sm:text-2xl">
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </h1>
-              <p className="text-muted-foreground truncate">
-                {vehicle.variant}
-              </p>
-              <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+              {vehicle.variant && (
+                <p className="mt-0.5 text-sm text-muted-foreground sm:text-base">
+                  {vehicle.variant}
+                </p>
+              )}
+              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400 sm:mt-1.5">
                 ⚠️ Using mock data - Configure Supabase for real data
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end sm:shrink-0">
+          <div className="flex w-full flex-wrap items-center gap-2 justify-start sm:w-auto sm:justify-end sm:shrink-0">
             <Link href={`/dashboard/inventory/${vehicle.id}/edit`}>
-              <Button>
+              <Button size="sm" className="w-full sm:w-auto">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Vehicle
               </Button>
@@ -154,10 +156,10 @@ export default async function VehicleDetailPage({
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 min-w-0">
           {/* Images */}
-          <Card className="overflow-hidden">
-            <div className="p-4">
+          <Card className="min-w-0 overflow-hidden">
+            <div className="p-4 min-w-0">
               <VehicleImageCarousel
                 images={vehicle.vehicle_images ?? []}
                 alt={`${vehicle.make} ${vehicle.model}`}
@@ -166,7 +168,7 @@ export default async function VehicleDetailPage({
           </Card>
 
           {/* Details */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0">
             <Card>
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
@@ -361,28 +363,30 @@ export default async function VehicleDetailPage({
 
       return (
         <div className="space-y-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-            <div className="flex items-start gap-4 min-w-0">
-              <Link href="/dashboard/inventory">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+              <Link href="/dashboard/inventory" className="shrink-0">
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold truncate">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl font-bold leading-tight sm:text-2xl">
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </h1>
-                <p className="text-muted-foreground truncate">
-                  {vehicle.variant}
-                </p>
-                <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                {vehicle.variant && (
+                  <p className="mt-0.5 text-sm text-muted-foreground sm:text-base">
+                    {vehicle.variant}
+                  </p>
+                )}
+                <p className="mt-2 text-sm text-amber-600 dark:text-amber-400 sm:mt-1.5">
                   ⚠️ Using mock data - Vehicle not found in database
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end sm:shrink-0">
+            <div className="flex w-full flex-wrap items-center gap-2 justify-start sm:w-auto sm:justify-end sm:shrink-0">
               <Link href={`/dashboard/inventory/${vehicle.id}/edit`}>
-                <Button>
+                <Button size="sm" className="w-full sm:w-auto">
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit Vehicle
                 </Button>
@@ -518,41 +522,41 @@ export default async function VehicleDetailPage({
     return (
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div className="flex items-start gap-4 min-w-0">
-            <Link href="/dashboard/inventory">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+            <Link href="/dashboard/inventory" className="shrink-0">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold truncate">
-                  {vehicle.year} {vehicle.make} {vehicle.model}
-                </h1>
-                <Badge variant="outline" className="capitalize">
-                  {vehicle.status}
-                </Badge>
-                <Badge variant="secondary" className="capitalize">
-                  {vehicle.condition}
-                </Badge>
-              </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold leading-tight sm:text-2xl">
+                {vehicle.year} {vehicle.make} {vehicle.model}
+              </h1>
               {isPresent(vehicle.variant) && (
-                <p className="text-muted-foreground truncate">
+                <p className="mt-0.5 text-sm text-muted-foreground sm:text-base">
                   {vehicle.variant}
                 </p>
               )}
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:mt-1.5 sm:gap-2">
+                <Badge variant="outline" className="capitalize text-xs sm:text-xs">
+                  {vehicle.status}
+                </Badge>
+                <Badge variant="secondary" className="capitalize text-xs sm:text-xs">
+                  {vehicle.condition}
+                </Badge>
+              </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end sm:shrink-0">
+          <div className="flex w-full flex-wrap items-center gap-2 justify-start sm:w-auto sm:justify-end sm:shrink-0">
             {canShowDeals && latestDeal?.id && (
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" size="sm">
                 <Link href={`/dashboard/deals/${latestDeal.id}`}>
                   View Deal
                 </Link>
               </Button>
             )}
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href={`/dashboard/inventory/${vehicle.id}/edit`}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Vehicle
@@ -561,11 +565,11 @@ export default async function VehicleDetailPage({
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-12">
+        <div className="grid gap-6 lg:grid-cols-12 min-w-0">
           {/* Left: Media + key summary */}
-          <div className="lg:col-span-7 space-y-6">
-            <Card className="overflow-hidden">
-              <div className="p-4">
+          <div className="lg:col-span-7 space-y-6 min-w-0">
+            <Card className="min-w-0 overflow-hidden">
+              <div className="p-4 min-w-0">
                 <VehicleImageCarousel
                   images={vehicle.vehicle_images ?? []}
                   alt={`${vehicle.make} ${vehicle.model}`}
@@ -627,7 +631,7 @@ export default async function VehicleDetailPage({
           </div>
 
           {/* Right: Clean, only-filled details */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 min-w-0">
             <Card>
               <CardHeader>
                 <CardTitle>Details</CardTitle>
@@ -1234,28 +1238,30 @@ export default async function VehicleDetailPage({
 
     return (
       <div className="space-y-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div className="flex items-start gap-4 min-w-0">
-            <Link href="/dashboard/inventory">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+            <Link href="/dashboard/inventory" className="shrink-0">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold truncate">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold leading-tight sm:text-2xl">
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </h1>
-              <p className="text-muted-foreground truncate">
-                {vehicle.variant}
-              </p>
-              <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+              {vehicle.variant && (
+                <p className="mt-0.5 text-sm text-muted-foreground sm:text-base">
+                  {vehicle.variant}
+                </p>
+              )}
+              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400 sm:mt-1.5">
                 ⚠️ Using mock data - Supabase connection failed
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end sm:shrink-0">
+          <div className="flex w-full flex-wrap items-center gap-2 justify-start sm:w-auto sm:justify-end sm:shrink-0">
             <Link href={`/dashboard/inventory/${vehicle.id}/edit`}>
-              <Button>
+              <Button size="sm" className="w-full sm:w-auto">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Vehicle
               </Button>

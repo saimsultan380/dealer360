@@ -164,15 +164,17 @@ export default async function SalesPage({
         </div>
       ) : null}
 
-      <SalesTable
-        sales={sales as any}
-        pagination={{
-          page: metadata?.page ?? page,
-          limit: metadata?.limit ?? limit,
-          total: metadata?.total ?? sales?.length ?? 0,
-          totalPages: metadata?.totalPages ?? 1,
-        }}
-      />
+      <div className="min-w-0">
+        <SalesTable
+          sales={sales as any}
+          pagination={{
+            page: metadata?.page ?? page,
+            limit: metadata?.limit ?? limit,
+            total: metadata?.total ?? sales?.length ?? 0,
+            totalPages: metadata?.totalPages ?? 1,
+          }}
+        />
+      </div>
     </div>
   );
 }
