@@ -5,6 +5,7 @@ import { FeatureSection } from "@/components/landing/feature-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { TestimonialsSection } from "@/components/landing/testimonials-section";
+import { ContactSection } from "@/components/landing/contact-section";
 import { CTASection } from "@/components/landing/cta-section";
 import { Footer } from "@/components/landing/footer";
 
@@ -18,6 +19,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <PricingSection />
       <TestimonialsSection />
+      <ContactSection />
       <CTASection />
       <Footer />
     </main>

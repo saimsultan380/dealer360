@@ -188,7 +188,7 @@ export function HeroSection() {
             <div className="hidden sm:block h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
               <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Trusted by 500+ dealerships</span>
+              <span>Currently launching with select dealerships</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export function HeroSection() {
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
               </div>
               <div className="text-xs text-muted-foreground">
-                DealerOS Dashboard
+                Dealer360 Dashboard
               </div>
               <div className="hidden sm:flex items-center gap-2 text-xs">
                 <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-2 py-0.5 text-primary border border-primary/20">
@@ -226,7 +226,7 @@ export function HeroSection() {
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-blue-500/10" />
               <Image
                 src="/hero-img.png"
-                alt="DealerOS dashboard preview"
+                alt="Dealer360 dashboard preview"
                 width={1400}
                 height={900}
                 priority

@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 const testimonials = [
   {
     quote:
-      "DealerOS replaced our spreadsheets and sticky notes. We close more deals and our investors get clear reports. Game changer.",
+      "Dealer360 replaced our spreadsheets and sticky notes. We close more deals and our investors get clear reports. Game changer.",
     name: "Ahmed Khan",
     role: "Owner, Premium Motors Lahore",
   },
@@ -37,7 +37,7 @@ const testimonials = [
   },
   {
     quote:
-      "We tried three other systems before DealerOS. This one actually fits how Pakistani dealerships work. Worth every rupee.",
+      "We tried three other systems before Dealer360. This one actually fits how Pakistani dealerships work. Worth every rupee.",
     name: "Farhan Ali",
     role: "Partner, City Motors Faisalabad",
   },
@@ -139,7 +139,7 @@ export function TestimonialsSection() {
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
             See what dealership owners and managers say about running their
-            business on DealerOS.
+            business on Dealer360.
           </p>
         </div>
 

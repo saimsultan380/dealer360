@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Car } from "lucide-react";
 
 export function Footer() {
   return (
@@ -10,12 +10,15 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-6">
-              <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">
-                  D
-                </span>
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Car className="h-4 w-4" aria-hidden="true" />
               </div>
-              <span className="text-xl font-bold">DealerOS</span>
+              <span
+                className="text-xl font-bold"
+                style={{ fontFamily: "var(--font-prata), Prata, serif" }}
+              >
+                Dealer 360
+              </span>
             </div>
             <p className="text-muted-foreground max-w-xs mb-6">
               The complete operating system for modern car dealerships. Automate

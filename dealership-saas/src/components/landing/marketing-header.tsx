@@ -9,6 +9,7 @@ import {
   ListOrdered,
   CreditCard,
   MessageSquareQuote,
+  Car,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -52,11 +53,14 @@ export function MarketingHeader() {
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">D</span>
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <Car className="h-4 w-4" aria-hidden="true" />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-            DealerOS
+          <span
+            className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70"
+            style={{ fontFamily: "var(--font-prata), Prata, serif" }}
+          >
+            Dealer 360
           </span>
         </Link>
 
@@ -116,13 +120,14 @@ export function MarketingHeader() {
                 onClick={closeMobile}
                 className="flex items-center gap-2 focus:outline-none"
               >
-                <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">
-                    D
-                  </span>
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <Car className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <span className="text-lg font-bold text-foreground">
-                  DealerOS
+                <span
+                  className="text-lg font-bold text-foreground"
+                  style={{ fontFamily: "var(--font-prata), Prata, serif" }}
+                >
+                  Dealer 360
                 </span>
               </Link>
             </SheetTitle>

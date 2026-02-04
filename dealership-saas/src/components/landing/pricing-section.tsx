@@ -60,7 +60,7 @@ function formatPrice(n: number) {
 
 export function PricingSection() {
   const container = useRef(null);
-  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
   useGSAP(
     () => {

@@ -11,8 +11,8 @@ gsap.registerPlugin(ScrollTrigger);
 const stats = [
   {
     icon: Building2,
-    value: "500+",
-    label: "Dealerships onboarded",
+    value: "New",
+    label: "Product currently launching",
   },
   {
     icon: Car,
