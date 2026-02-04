@@ -159,7 +159,7 @@ export default function InvestorsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-figures tabular-nums">
               PKR {totalBalance.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -193,7 +193,7 @@ export default function InvestorsPage() {
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-figures tabular-nums">
               PKR {totalWithdrawn.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -300,8 +300,8 @@ export default function InvestorsPage() {
                           investor.status === "active"
                             ? "default"
                             : investor.status === "inactive"
-                            ? "secondary"
-                            : "destructive"
+                              ? "secondary"
+                              : "destructive"
                         }
                       >
                         {investor.status}

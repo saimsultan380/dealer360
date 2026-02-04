@@ -186,7 +186,7 @@ export default function ClientDetailPage({
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600 font-figures tabular-nums">
               PKR {client.total_spent.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">All-time purchases</p>
@@ -201,7 +201,7 @@ export default function ClientDetailPage({
             <AlertCircle className="h-4 w-4 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">
+            <div className="text-2xl font-bold text-amber-600 font-figures tabular-nums">
               PKR {client.total_dues.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -218,7 +218,9 @@ export default function ClientDetailPage({
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{client.total_purchases}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {client.total_purchases}
+            </div>
             <p className="text-xs text-muted-foreground">
               Completed transactions
             </p>
@@ -279,8 +281,8 @@ export default function ClientDetailPage({
                     client.status === "active"
                       ? "default"
                       : client.status === "inactive"
-                      ? "secondary"
-                      : "destructive"
+                        ? "secondary"
+                        : "destructive"
                   }
                 >
                   {client.status}
@@ -398,8 +400,8 @@ export default function ClientDetailPage({
                             transaction.transaction_type === "purchase"
                               ? "default"
                               : transaction.transaction_type === "payment"
-                              ? "default"
-                              : "secondary"
+                                ? "default"
+                                : "secondary"
                           }
                         >
                           {transaction.transaction_type === "purchase" ? (
@@ -462,8 +464,8 @@ export default function ClientDetailPage({
                             transaction.status === "completed"
                               ? "default"
                               : transaction.status === "pending"
-                              ? "secondary"
-                              : "destructive"
+                                ? "secondary"
+                                : "destructive"
                           }
                         >
                           {transaction.status}

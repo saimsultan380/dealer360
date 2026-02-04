@@ -206,8 +206,8 @@ export function SalesTable({
             realtimeStatus === "connected"
               ? "bg-green-500"
               : realtimeStatus === "error"
-              ? "bg-red-500"
-              : "bg-yellow-500"
+                ? "bg-red-500"
+                : "bg-yellow-500"
           }`}
           aria-label={`Realtime connection: ${realtimeStatus}`}
         />
@@ -215,8 +215,8 @@ export function SalesTable({
           {realtimeStatus === "connected"
             ? "Live updates enabled"
             : realtimeStatus === "error"
-            ? "Connection error"
-            : "Connecting..."}
+              ? "Connection error"
+              : "Connecting..."}
         </span>
       </div>
 
@@ -310,17 +310,17 @@ export function SalesTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                      <p className="font-bold text-emerald-600 dark:text-emerald-400 font-figures tabular-nums">
                         PKR {parseFloat(sale.sale_price).toLocaleString()}
                       </p>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">
+                        <p className="font-medium font-figures tabular-nums">
                           PKR {parseFloat(sale.down_payment).toLocaleString()}
                         </p>
                         {remainingAmount > 0 && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
+                          <p className="text-xs text-amber-600 dark:text-amber-400 font-figures tabular-nums">
                             Due: PKR {remainingAmount.toLocaleString()}
                           </p>
                         )}
@@ -516,7 +516,7 @@ export function SalesTable({
                     </div>
 
                     <div className="mt-2 flex items-center justify-between">
-                      <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                      <p className="font-bold text-emerald-600 dark:text-emerald-400 font-figures tabular-nums">
                         PKR {parseFloat(sale.sale_price).toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -528,7 +528,7 @@ export function SalesTable({
                     </div>
 
                     {remainingAmount > 0 && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-figures tabular-nums">
                         Due: PKR {remainingAmount.toLocaleString()}
                       </p>
                     )}

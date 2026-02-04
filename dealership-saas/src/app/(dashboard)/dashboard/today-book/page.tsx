@@ -455,7 +455,9 @@ export default function TodayBookPage() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-2xl font-bold mb-2">{stat.value}</div>
+              <div className="text-2xl font-bold mb-2 font-figures tabular-nums">
+                {stat.value}
+              </div>
               <p className="text-xs text-muted-foreground mb-3">
                 {stat.description}
               </p>
@@ -504,7 +506,7 @@ export default function TodayBookPage() {
                   </CardDescription>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 font-figures tabular-nums">
                     PKR {(summary.totalRevenue / 1000000).toFixed(1)}M
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -560,7 +562,7 @@ export default function TodayBookPage() {
                           {source.name}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold">
+                      <span className="text-sm font-semibold font-figures tabular-nums">
                         PKR {(source.value / 1000000).toFixed(1)}M
                       </span>
                     </div>
@@ -631,8 +633,8 @@ export default function TodayBookPage() {
                         return num >= 1_000_000
                           ? `${(num / 1_000_000).toFixed(1)}M`
                           : num >= 1_000
-                          ? `${(num / 1_000).toFixed(0)}K`
-                          : num.toLocaleString();
+                            ? `${(num / 1_000).toFixed(0)}K`
+                            : num.toLocaleString();
                       }}
                     />
                     <ChartTooltip
@@ -683,16 +685,16 @@ export default function TodayBookPage() {
                   activity.status === "completed"
                     ? "emerald"
                     : activity.status === "pending"
-                    ? "amber"
-                    : "blue";
+                      ? "amber"
+                      : "blue";
 
                 // Only keep a colored border per status; shadow is applied on hover only
                 const statusBorder =
                   activity.status === "completed"
                     ? "border-emerald-500/20"
                     : activity.status === "pending"
-                    ? "border-amber-500/20"
-                    : "border-blue-500/20";
+                      ? "border-amber-500/20"
+                      : "border-blue-500/20";
 
                 return (
                   <div
@@ -713,8 +715,8 @@ export default function TodayBookPage() {
                               activity.status === "completed"
                                 ? "bg-emerald-100 dark:bg-emerald-900/40"
                                 : activity.status === "pending"
-                                ? "bg-amber-100 dark:bg-amber-900/40"
-                                : "bg-blue-100 dark:bg-blue-900/40"
+                                  ? "bg-amber-100 dark:bg-amber-900/40"
+                                  : "bg-blue-100 dark:bg-blue-900/40"
                             )}
                           >
                             <div
@@ -722,8 +724,8 @@ export default function TodayBookPage() {
                                 activity.status === "completed"
                                   ? "text-emerald-600 dark:text-emerald-400"
                                   : activity.status === "pending"
-                                  ? "text-amber-600 dark:text-amber-400"
-                                  : "text-blue-600 dark:text-blue-400"
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : "text-blue-600 dark:text-blue-400"
                               )}
                             >
                               <ActivityIcon type={activity.type} />

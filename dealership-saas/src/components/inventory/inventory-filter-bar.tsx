@@ -65,7 +65,7 @@ export function InventoryFilterBar({
           <select
             value={initialStatus}
             onChange={handleStatusChange}
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
+            className="w-full min-w-[180px] rounded-md border bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-[200px]"
           >
             <option value="all">All statuses</option>
             <option value="available">Available</option>

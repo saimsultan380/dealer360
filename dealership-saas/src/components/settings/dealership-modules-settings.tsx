@@ -1,14 +1,37 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { Building2, Car, FileText, Globe, Ship, ClipboardCheck, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { useAuthStore } from '@/lib/store';
-import { getOrganizationModuleConfig, updateOrganizationModuleConfig, type OrgModulesConfig } from '@/lib/actions/org-modules';
-import type { DealershipType } from '@/lib/types/database';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Building2,
+  Car,
+  CircleUser,
+  ClipboardCheck,
+  FileText,
+  Globe,
+  HandshakeIcon,
+  BookText,
+  ShieldCheck,
+  Ship,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { useAuthStore } from "@/lib/store";
+import {
+  getOrganizationModuleConfig,
+  updateOrganizationModuleConfig,
+  type OrgModulesConfig,
+} from "@/lib/actions/org-modules";
+import type { DealershipType } from "@/lib/types/database";
 
 function ToggleRow(props: {
   icon: React.ReactNode;
@@ -26,10 +49,16 @@ function ToggleRow(props: {
         </div>
         <div className="min-w-0">
           <div className="font-medium">{props.title}</div>
-          <div className="text-sm text-muted-foreground">{props.description}</div>
+          <div className="text-sm text-muted-foreground">
+            {props.description}
+          </div>
         </div>
       </div>
-      <Switch checked={props.checked} onCheckedChange={props.onCheckedChange} disabled={props.disabled} />
+      <Switch
+        checked={props.checked}
+        onCheckedChange={props.onCheckedChange}
+        disabled={props.disabled}
+      />
     </div>
   );
 }
@@ -55,17 +84,23 @@ const DEFAULT_MODULES: OrgModulesConfig = {
 
 export function DealershipModulesSettings() {
   const { profile, setOrganization } = useAuthStore();
-  const canEdit = profile?.role === 'admin' || profile?.role === 'manager' || profile?.role === 'super_admin';
+  const canEdit =
+    profile?.role === "admin" ||
+    profile?.role === "manager" ||
+    profile?.role === "super_admin";
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [dealershipType, setDealershipType] = useState<DealershipType>('local');
+  const [dealershipType, setDealershipType] = useState<DealershipType>("local");
   const [modules, setModules] = useState<OrgModulesConfig>(DEFAULT_MODULES);
 
-  const japanSectionDisabled = useMemo(() => dealershipType === 'local', [dealershipType]);
+  const japanSectionDisabled = useMemo(
+    () => dealershipType === "local",
+    [dealershipType]
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -85,7 +120,7 @@ export function DealershipModulesSettings() {
 
   useEffect(() => {
     // If the dealership is local-only, force-disable japan import modules in UI (still saved on submit).
-    if (dealershipType === 'local') {
+    if (dealershipType === "local") {
       setModules((m) => ({
         ...m,
         japan_import: false,
@@ -115,7 +150,7 @@ export function DealershipModulesSettings() {
 
     // Keep client store in sync so sidebar reacts immediately.
     if (res.data) setOrganization(res.data);
-    setSuccess('Configuration saved');
+    setSuccess("Configuration saved");
     setTimeout(() => setSuccess(null), 2500);
     setSaving(false);
   };
@@ -123,23 +158,37 @@ export function DealershipModulesSettings() {
   if (!canEdit) {
     return (
       <div className="rounded-lg border bg-muted/50 p-4 text-sm text-muted-foreground">
-        You don&apos;t have permission to edit module configuration. Ask your admin/manager.
+        You don&apos;t have permission to edit module configuration. Ask your
+        admin/manager.
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {error && <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-      {success && <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-300">{success}</div>}
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-300">
+          {success}
+        </div>
+      )}
 
       <div className="space-y-2">
         <div className="text-sm font-medium">Dealership type</div>
         <div className="text-sm text-muted-foreground">
-          Choose how this dealership operates. This controls which module groups are available.
+          Choose how this dealership operates. This controls which module groups
+          are available.
         </div>
         <div className="max-w-md">
-          <Select value={dealershipType} onValueChange={(v) => setDealershipType(v as DealershipType)} disabled={loading || saving}>
+          <Select
+            value={dealershipType}
+            onValueChange={(v) => setDealershipType(v as DealershipType)}
+            disabled={loading || saving}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select dealership type" />
             </SelectTrigger>
@@ -182,7 +231,9 @@ export function DealershipModulesSettings() {
             title="Exchange Deals"
             description="Trade-in / exchange workflows"
             checked={modules.exchange_deals}
-            onCheckedChange={(v) => setModules((m) => ({ ...m, exchange_deals: v }))}
+            onCheckedChange={(v) =>
+              setModules((m) => ({ ...m, exchange_deals: v }))
+            }
             disabled={loading || saving}
           />
           <ToggleRow
@@ -191,6 +242,14 @@ export function DealershipModulesSettings() {
             description="Loans, EMI schedules, and tracking"
             checked={modules.financing}
             onCheckedChange={(v) => setModules((m) => ({ ...m, financing: v }))}
+            disabled={loading || saving}
+          />
+          <ToggleRow
+            icon={<HandshakeIcon className="h-4 w-4 text-primary" />}
+            title="Deals"
+            description="Pending deals and sales completion workflow"
+            checked={modules.deals}
+            onCheckedChange={(v) => setModules((m) => ({ ...m, deals: v }))}
             disabled={loading || saving}
           />
           <ToggleRow
@@ -209,6 +268,38 @@ export function DealershipModulesSettings() {
             onCheckedChange={(v) => setModules((m) => ({ ...m, leads: v }))}
             disabled={loading || saving}
           />
+          <ToggleRow
+            icon={<CircleUser className="h-4 w-4 text-primary" />}
+            title="Clients"
+            description="Customer profiles and transactions"
+            checked={modules.clients}
+            onCheckedChange={(v) => setModules((m) => ({ ...m, clients: v }))}
+            disabled={loading || saving}
+          />
+          <ToggleRow
+            icon={<TrendingUp className="h-4 w-4 text-primary" />}
+            title="Investors"
+            description="Investor management and contributions"
+            checked={modules.investors}
+            onCheckedChange={(v) => setModules((m) => ({ ...m, investors: v }))}
+            disabled={loading || saving}
+          />
+          <ToggleRow
+            icon={<Wallet className="h-4 w-4 text-primary" />}
+            title="Cash Flow"
+            description="Cash transactions and expense tracking"
+            checked={modules.cash_flow}
+            onCheckedChange={(v) => setModules((m) => ({ ...m, cash_flow: v }))}
+            disabled={loading || saving}
+          />
+          <ToggleRow
+            icon={<BookText className="h-4 w-4 text-primary" />}
+            title="Ledger"
+            description="Accounting ledger and reporting"
+            checked={modules.ledger}
+            onCheckedChange={(v) => setModules((m) => ({ ...m, ledger: v }))}
+            disabled={loading || saving}
+          />
         </div>
       </div>
 
@@ -220,7 +311,8 @@ export function DealershipModulesSettings() {
           <div className="font-medium">Japan import modules</div>
         </div>
         <div className="text-sm text-muted-foreground">
-          Track the full import process: auction → shipment → port arrival → customs → inspection → ready for sale.
+          Track the full import process: auction → shipment → port arrival →
+          customs → inspection → ready for sale.
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
@@ -229,7 +321,9 @@ export function DealershipModulesSettings() {
             title="Japan Import"
             description="Enable the Japan import workflow module"
             checked={modules.japan_import}
-            onCheckedChange={(v) => setModules((m) => ({ ...m, japan_import: v }))}
+            onCheckedChange={(v) =>
+              setModules((m) => ({ ...m, japan_import: v }))
+            }
             disabled={loading || saving || japanSectionDisabled}
           />
           <ToggleRow
@@ -237,7 +331,9 @@ export function DealershipModulesSettings() {
             title="Import Documents"
             description="Auction sheets, BL, export cert, customs docs"
             checked={modules.import_documents}
-            onCheckedChange={(v) => setModules((m) => ({ ...m, import_documents: v }))}
+            onCheckedChange={(v) =>
+              setModules((m) => ({ ...m, import_documents: v }))
+            }
             disabled={loading || saving || japanSectionDisabled}
           />
           <ToggleRow
@@ -245,7 +341,9 @@ export function DealershipModulesSettings() {
             title="Shipments"
             description="Vessel/BL tracking and ETA timeline"
             checked={modules.import_shipments}
-            onCheckedChange={(v) => setModules((m) => ({ ...m, import_shipments: v }))}
+            onCheckedChange={(v) =>
+              setModules((m) => ({ ...m, import_shipments: v }))
+            }
             disabled={loading || saving || japanSectionDisabled}
           />
           <ToggleRow
@@ -253,7 +351,9 @@ export function DealershipModulesSettings() {
             title="Customs & Clearance"
             description="Duty/tax, clearance dates, status"
             checked={modules.import_customs}
-            onCheckedChange={(v) => setModules((m) => ({ ...m, import_customs: v }))}
+            onCheckedChange={(v) =>
+              setModules((m) => ({ ...m, import_customs: v }))
+            }
             disabled={loading || saving || japanSectionDisabled}
           />
           <ToggleRow
@@ -261,18 +361,23 @@ export function DealershipModulesSettings() {
             title="Inspection"
             description="Condition checks before listing for sale"
             checked={modules.import_inspections}
-            onCheckedChange={(v) => setModules((m) => ({ ...m, import_inspections: v }))}
+            onCheckedChange={(v) =>
+              setModules((m) => ({ ...m, import_inspections: v }))
+            }
             disabled={loading || saving || japanSectionDisabled}
           />
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-        <Button onClick={save} disabled={loading || saving} className="w-full sm:w-auto">
-          {saving ? 'Saving...' : 'Save Configuration'}
+        <Button
+          onClick={save}
+          disabled={loading || saving}
+          className="w-full sm:w-auto"
+        >
+          {saving ? "Saving..." : "Save Configuration"}
         </Button>
       </div>
     </div>
   );
 }
-

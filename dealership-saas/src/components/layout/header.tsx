@@ -193,40 +193,22 @@ export function Header() {
           </SheetContent>
         </Sheet>
 
-        {/* Brand */}
+        {/* Brand (text only, no icon) */}
         <Link
           href="/dashboard"
           className={cn(
-            "flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors",
-            "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            "hidden sm:flex flex-col leading-tight min-w-0 rounded-md px-1.5 py-1 transition-colors",
+            "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            !showBrandText && "lg:hidden"
           )}
           aria-label="Go to dashboard"
         >
-          <div className="h-8 w-8 rounded-lg border bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
-            {/* Prefer org logo; fallback to bundled icon */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={brandLogoSrc}
-              alt={
-                organization?.name ? `${organization.name} logo` : "Dealer logo"
-              }
-              className="h-full w-full object-contain"
-              onError={() => setBrandLogoError(true)}
-            />
-          </div>
-          <div
-            className={cn(
-              "hidden sm:flex flex-col leading-tight min-w-0",
-              !showBrandText && "lg:hidden"
-            )}
-          >
-            <span className="text-sm font-semibold truncate">
-              {organization?.name || "Dealer 360"}
-            </span>
-            <span className="text-[11px] text-muted-foreground truncate">
-              Dealership management
-            </span>
-          </div>
+          <span className="text-sm font-semibold truncate">
+            {organization?.name || "Dealer 360"}
+          </span>
+          <span className="text-[11px] text-muted-foreground truncate">
+            Dealership management
+          </span>
         </Link>
 
         {/* Module */}
@@ -375,8 +357,8 @@ export function Header() {
                               {deal.days_until_payment === 0
                                 ? "Due today"
                                 : deal.days_until_payment === 1
-                                ? "Due tomorrow"
-                                : `Due in ${deal.days_until_payment} days`}
+                                  ? "Due tomorrow"
+                                  : `Due in ${deal.days_until_payment} days`}
                             </span>
                           </div>
                         </div>

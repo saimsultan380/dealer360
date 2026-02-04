@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface ThemeColors {
   primary: string;
@@ -23,11 +23,11 @@ export interface ThemeCustomization {
 }
 
 const DEFAULT_COLORS: ThemeColors = {
-  primary: '#3b82f6', // blue
-  secondary: '#6366f1', // indigo
-  accent: '#06b6d4', // cyan
-  destructive: '#ef4444', // red
-  muted: '#9ca3af', // gray
+  primary: "#3b82f6", // blue
+  secondary: "#6366f1", // indigo
+  accent: "#06b6d4", // cyan
+  destructive: "#ef4444", // red
+  muted: "#9ca3af", // gray
 };
 
 const DEFAULT_COMPONENT_STYLES: ComponentStyles = {
@@ -56,11 +56,11 @@ export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
       theme: DEFAULT_THEME,
-      
+
       setTheme: (theme: ThemeCustomization) => {
         set({ theme });
       },
-      
+
       updateColors: (colors: Partial<ThemeColors>) => {
         set((state) => ({
           theme: {
@@ -69,7 +69,7 @@ export const useThemeStore = create<ThemeStore>()(
           },
         }));
       },
-      
+
       updateComponentStyles: (styles: Partial<ComponentStyles>) => {
         set((state) => ({
           theme: {
@@ -78,7 +78,7 @@ export const useThemeStore = create<ThemeStore>()(
           },
         }));
       },
-      
+
       resetTheme: () => {
         set({ theme: DEFAULT_THEME });
       },
@@ -96,8 +96,20 @@ export const useThemeStore = create<ThemeStore>()(
       },
     }),
     {
-      name: 'theme-store',
+      name: "theme-store",
       version: 2,
+      migrate: (persisted, version) => {
+        if (version === 2 && persisted != null) return persisted as { theme: ThemeCustomization };
+        const raw = (persisted ?? {}) as Partial<{ theme: Partial<ThemeCustomization> }>;
+        const theme: ThemeCustomization = {
+          colors: { ...DEFAULT_COLORS, ...raw.theme?.colors },
+          componentStyles: {
+            ...DEFAULT_COMPONENT_STYLES,
+            ...raw.theme?.componentStyles,
+          },
+        };
+        return { ...raw, theme };
+      },
     }
   )
 );

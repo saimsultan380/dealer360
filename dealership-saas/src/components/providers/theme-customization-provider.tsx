@@ -1,23 +1,29 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useThemeStore } from '@/lib/store/theme-store';
+import { useEffect } from "react";
+import { useThemeStore } from "@/lib/store/theme-store";
 
-export function ThemeCustomizationProvider({ children }: { children: React.ReactNode }) {
+export function ThemeCustomizationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
     const applyTheme = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === "undefined") return;
 
-      let styleElement = document.getElementById('theme-customization-styles') as HTMLStyleElement;
+      let styleElement = document.getElementById(
+        "theme-customization-styles"
+      ) as HTMLStyleElement;
       if (!styleElement) {
-        styleElement = document.createElement('style');
-        styleElement.id = 'theme-customization-styles';
+        styleElement = document.createElement("style");
+        styleElement.id = "theme-customization-styles";
         document.head.appendChild(styleElement);
       }
 
-      let css = '';
+      let css = "";
 
       // Apply colors ONLY to selected components
       if (theme.componentStyles.buttons) {

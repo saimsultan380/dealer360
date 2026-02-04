@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Plus, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -36,9 +36,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { useAuthStore } from '@/lib/store';
-import type { UserRole } from '@/lib/types/database';
+} from "@/components/ui/dialog";
+import { useAuthStore } from "@/lib/store";
+import type { UserRole } from "@/lib/types/database";
 import {
   createStaffMember,
   getStaffMembers,
@@ -46,24 +46,24 @@ import {
   updateStaffRole,
   updateStaffModuleAccess,
   type StaffMember,
-} from '@/lib/actions/staff';
+} from "@/lib/actions/staff";
 import {
   STAFF_MODULE_LABELS,
   STAFF_MODULE_PREFIXES,
   getDefaultStaffModulesForRole,
   normalizeStaffModules,
   type StaffModuleKey,
-} from '@/lib/auth/module-access';
+} from "@/lib/auth/module-access";
 
-const roleOptions: Array<Exclude<UserRole, 'super_admin'>> = [
-  'admin',
-  'manager',
-  'salesperson',
-  'accountant',
+const roleOptions: Array<Exclude<UserRole, "super_admin">> = [
+  "admin",
+  "manager",
+  "salesperson",
+  "accountant",
 ];
 
 export function StaffSettings() {
-  const { profile } = useAuthStore();
+  const { profile, organization } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,15 +71,42 @@ export function StaffSettings() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
 
   const canManage = useMemo(() => {
-    return profile?.role === 'admin' || profile?.role === 'super_admin';
+    return profile?.role === "admin" || profile?.role === "super_admin";
   }, [profile?.role]);
 
+  const orgFeatureFlags = (organization?.feature_flags ?? {}) as any;
+  const orgModuleEnabled = useMemo(() => {
+    // Backward compatibility: undefined means "enabled" for most modules.
+    const fallbackTrue = (v: any) => (v === undefined ? true : !!v);
+
+    const enabledByKey: Record<StaffModuleKey, boolean> = {
+      dashboard: true,
+      settings: true,
+      today_book: true,
+      inventory: fallbackTrue(orgFeatureFlags?.enable_inventory),
+      sales: fallbackTrue(orgFeatureFlags?.enable_sales),
+      exchange_deals: fallbackTrue(orgFeatureFlags?.enable_exchange_deals),
+      financing: fallbackTrue(orgFeatureFlags?.enable_financing),
+      leads: fallbackTrue(orgFeatureFlags?.enable_leads),
+      deals: fallbackTrue(orgFeatureFlags?.enable_deals),
+      documents: fallbackTrue(orgFeatureFlags?.enable_documents),
+      cash_flow: fallbackTrue(orgFeatureFlags?.enable_cash_flow),
+      ledger: fallbackTrue(orgFeatureFlags?.enable_ledger),
+      clients: fallbackTrue(orgFeatureFlags?.enable_clients),
+      investors: fallbackTrue(orgFeatureFlags?.enable_investors),
+      // Off by default unless explicitly enabled
+      japan_import: !!orgFeatureFlags?.enable_japan_import,
+    };
+
+    return enabledByKey;
+  }, [orgFeatureFlags]);
+
   const [newStaff, setNewStaff] = useState({
-    email: '',
-    full_name: '',
-    role: 'salesperson' as Exclude<UserRole, 'super_admin'>,
-    temporary_password: '',
-    modules: getDefaultStaffModulesForRole('salesperson'),
+    email: "",
+    full_name: "",
+    role: "salesperson" as Exclude<UserRole, "super_admin">,
+    temporary_password: "",
+    modules: getDefaultStaffModulesForRole("salesperson"),
   });
 
   const refresh = async () => {
@@ -125,21 +152,24 @@ export function StaffSettings() {
 
     setSuccess(
       newStaff.temporary_password?.trim()
-        ? 'Staff created. Share the temporary password with them.'
-        : 'Invite sent. Staff should check email to set their password.'
+        ? "Staff created. Share the temporary password with them."
+        : "Invite sent. Staff should check email to set their password."
     );
     setNewStaff({
-      email: '',
-      full_name: '',
-      role: 'salesperson',
-      temporary_password: '',
-      modules: getDefaultStaffModulesForRole('salesperson'),
+      email: "",
+      full_name: "",
+      role: "salesperson",
+      temporary_password: "",
+      modules: getDefaultStaffModulesForRole("salesperson"),
     });
     await refresh();
     setSaving(false);
   };
 
-  const onRoleChange = async (staffId: string, role: Exclude<UserRole, 'super_admin'>) => {
+  const onRoleChange = async (
+    staffId: string,
+    role: Exclude<UserRole, "super_admin">
+  ) => {
     setError(null);
     setSuccess(null);
     const res = await updateStaffRole({ staff_id: staffId, role });
@@ -147,7 +177,7 @@ export function StaffSettings() {
       setError(res.error);
       return;
     }
-    setSuccess('Role updated');
+    setSuccess("Role updated");
     await refresh();
     setTimeout(() => setSuccess(null), 2000);
   };
@@ -155,17 +185,23 @@ export function StaffSettings() {
   const onActiveChange = async (staffId: string, isActive: boolean) => {
     setError(null);
     setSuccess(null);
-    const res = await setStaffActive({ staff_id: staffId, is_active: isActive });
+    const res = await setStaffActive({
+      staff_id: staffId,
+      is_active: isActive,
+    });
     if (res.error) {
       setError(res.error);
       return;
     }
-    setSuccess(isActive ? 'User activated' : 'User deactivated');
+    setSuccess(isActive ? "User activated" : "User deactivated");
     await refresh();
     setTimeout(() => setSuccess(null), 2000);
   };
 
-  const onModulesChange = async (staffId: string, modules: StaffModuleKey[] | null) => {
+  const onModulesChange = async (
+    staffId: string,
+    modules: StaffModuleKey[] | null
+  ) => {
     setError(null);
     setSuccess(null);
     const res = await updateStaffModuleAccess({ staff_id: staffId, modules });
@@ -173,7 +209,7 @@ export function StaffSettings() {
       setError(res.error);
       return;
     }
-    setSuccess('Access updated');
+    setSuccess("Access updated");
     await refresh();
     setTimeout(() => setSuccess(null), 2000);
   };
@@ -182,7 +218,11 @@ export function StaffSettings() {
 
   return (
     <div className="space-y-4">
-      {error && <div className="p-4 bg-destructive/10 text-destructive rounded-lg">{error}</div>}
+      {error && (
+        <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
+          {error}
+        </div>
+      )}
       {success && (
         <div className="p-4 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg">
           {success}
@@ -218,7 +258,9 @@ export function StaffSettings() {
                   <Input
                     id="staff-full-name"
                     value={newStaff.full_name}
-                    onChange={(e) => setNewStaff((s) => ({ ...s, full_name: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStaff((s) => ({ ...s, full_name: e.target.value }))
+                    }
                     placeholder="e.g. Ali Khan"
                     disabled={saving}
                   />
@@ -230,7 +272,9 @@ export function StaffSettings() {
                     id="staff-email"
                     type="email"
                     value={newStaff.email}
-                    onChange={(e) => setNewStaff((s) => ({ ...s, email: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStaff((s) => ({ ...s, email: e.target.value }))
+                    }
                     placeholder="e.g. staff@dealership.com"
                     disabled={saving}
                   />
@@ -243,7 +287,7 @@ export function StaffSettings() {
                     onValueChange={(v) =>
                       setNewStaff((s) => ({
                         ...s,
-                        role: v as Exclude<UserRole, 'super_admin'>,
+                        role: v as Exclude<UserRole, "super_admin">,
                         modules: getDefaultStaffModulesForRole(v as UserRole),
                       }))
                     }
@@ -255,7 +299,7 @@ export function StaffSettings() {
                     <SelectContent>
                       {roleOptions.map((r) => (
                         <SelectItem key={r} value={r}>
-                          {r.replace('_', ' ')}
+                          {r.replace("_", " ")}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -266,11 +310,19 @@ export function StaffSettings() {
                   <Label>Module access</Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" disabled={saving} className="w-full justify-between">
+                      <Button
+                        variant="outline"
+                        disabled={saving}
+                        className="w-full justify-between"
+                      >
                         <span className="truncate">
-                          {newStaff.modules?.length ? `${newStaff.modules.length} selected` : 'Select modules'}
+                          {newStaff.modules?.length
+                            ? `${newStaff.modules.length} selected`
+                            : "Select modules"}
                         </span>
-                        <span className="text-muted-foreground text-xs">Customize</span>
+                        <span className="text-muted-foreground text-xs">
+                          Customize
+                        </span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-80 p-0">
@@ -281,30 +333,56 @@ export function StaffSettings() {
                         </p>
                       </div>
                       <div className="p-2 max-h-[60vh] overflow-y-auto space-y-1">
-                        {(Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]).map((key) => {
-                          const locked = key === 'dashboard' || key === 'settings';
-                          const selected = normalizeStaffModules(newStaff.modules);
-                          const checked = locked ? true : selected.includes(key);
+                        {(
+                          Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]
+                        ).map((key) => {
+                          const locked =
+                            key === "dashboard" || key === "settings";
+                          const disabledByOrg = !orgModuleEnabled[key];
+                          const selected = normalizeStaffModules(
+                            newStaff.modules
+                          );
+                          const checked = locked
+                            ? true
+                            : selected.includes(key);
                           return (
                             <div
                               key={key}
-                              className={`flex items-center justify-between p-2 rounded-md hover:bg-muted/50 ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                              className={`flex items-center justify-between p-2 rounded-md hover:bg-muted/50 ${
+                                locked || disabledByOrg
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "cursor-pointer"
+                              }`}
                               onClick={(e) => {
-                                if (locked) return;
+                                if (locked || disabledByOrg) return;
                                 e.preventDefault();
-                                const current = new Set<StaffModuleKey>(selected);
+                                const current = new Set<StaffModuleKey>(
+                                  selected
+                                );
                                 if (!checked) current.add(key);
                                 else current.delete(key);
-                                setNewStaff((s) => ({ ...s, modules: Array.from(current) }));
+                                setNewStaff((s) => ({
+                                  ...s,
+                                  modules: Array.from(current),
+                                }));
                               }}
                             >
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-sm font-medium">{STAFF_MODULE_LABELS[key]}</span>
+                                <span className="text-sm font-medium">
+                                  {STAFF_MODULE_LABELS[key]}
+                                </span>
                                 <span className="text-[10px] text-muted-foreground">
-                                  {locked ? 'Required' : 'Enable access'}
+                                  {locked
+                                    ? "Required"
+                                    : disabledByOrg
+                                      ? "Disabled at organization level"
+                                      : "Enable access"}
                                 </span>
                               </div>
-                              <Switch checked={checked} disabled={locked} />
+                              <Switch
+                                checked={checked}
+                                disabled={locked || disabledByOrg}
+                              />
                             </div>
                           );
                         })}
@@ -314,7 +392,9 @@ export function StaffSettings() {
                           variant="ghost"
                           size="sm"
                           className="w-full text-xs h-8"
-                          onClick={() => setNewStaff((s) => ({ ...s, modules: [] }))}
+                          onClick={() =>
+                            setNewStaff((s) => ({ ...s, modules: [] }))
+                          }
                         >
                           Clear all (except required)
                         </Button>
@@ -322,23 +402,32 @@ export function StaffSettings() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <p className="text-xs text-muted-foreground">
-                    Dashboard and Settings are always available to avoid lockouts.
+                    Dashboard and Settings are always available to avoid
+                    lockouts.
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="staff-temp-password">Temporary password (optional)</Label>
+                  <Label htmlFor="staff-temp-password">
+                    Temporary password (optional)
+                  </Label>
                   <Input
                     id="staff-temp-password"
                     type="password"
                     value={newStaff.temporary_password}
-                    onChange={(e) => setNewStaff((s) => ({ ...s, temporary_password: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStaff((s) => ({
+                        ...s,
+                        temporary_password: e.target.value,
+                      }))
+                    }
                     placeholder="Leave blank to send invite email"
                     disabled={saving}
                   />
                   <p className="text-xs text-muted-foreground">
-                    If you set a password, the staff member can log in immediately. If left blank,
-                    an invite email is sent (requires Supabase email setup).
+                    If you set a password, the staff member can log in
+                    immediately. If left blank, an invite email is sent
+                    (requires Supabase email setup).
                   </p>
                 </div>
               </div>
@@ -351,7 +440,7 @@ export function StaffSettings() {
                       Creating...
                     </>
                   ) : (
-                    'Create'
+                    "Create"
                   )}
                 </Button>
               </DialogFooter>
@@ -375,13 +464,20 @@ export function StaffSettings() {
             {staff.map((m) => (
               <TableRow key={m.id}>
                 <TableCell className="font-medium">{m.full_name}</TableCell>
-                <TableCell className="text-muted-foreground">{m.email || '-'}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {m.email || "-"}
+                </TableCell>
                 <TableCell className="capitalize">
                   {canManage ? (
                     <Select
-                      value={m.role === 'super_admin' ? 'admin' : (m.role as any)}
+                      value={
+                        m.role === "super_admin" ? "admin" : (m.role as any)
+                      }
                       onValueChange={(v) =>
-                        onRoleChange(m.id, v as Exclude<UserRole, 'super_admin'>)
+                        onRoleChange(
+                          m.id,
+                          v as Exclude<UserRole, "super_admin">
+                        )
                       }
                     >
                       <SelectTrigger className="h-8 w-[140px]">
@@ -390,24 +486,28 @@ export function StaffSettings() {
                       <SelectContent>
                         {roleOptions.map((r) => (
                           <SelectItem key={r} value={r}>
-                            {r.replace('_', ' ')}
+                            {r.replace("_", " ")}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
-                    m.role.replace('_', ' ')
+                    m.role.replace("_", " ")
                   )}
                 </TableCell>
                 <TableCell>
                   {canManage ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 w-full max-w-[140px] justify-between">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-full max-w-[140px] justify-between"
+                        >
                           <span className="truncate">
                             {(m as any)?.module_access?.length
                               ? `${(m as any).module_access.length} selected`
-                              : 'Default'}
+                              : "Default"}
                           </span>
                           <SlidersHorizontal className="h-3.5 w-3.5 ml-2 opacity-50" />
                         </Button>
@@ -420,31 +520,56 @@ export function StaffSettings() {
                           </p>
                         </div>
                         <div className="p-2 max-h-[60vh] overflow-y-auto space-y-1">
-                          {(Object.keys(STAFF_MODULE_PREFIXES) as StaffModuleKey[]).map((key) => {
-                            const locked = key === 'dashboard' || key === 'settings';
+                          {(
+                            Object.keys(
+                              STAFF_MODULE_PREFIXES
+                            ) as StaffModuleKey[]
+                          ).map((key) => {
+                            const locked =
+                              key === "dashboard" || key === "settings";
+                            const disabledByOrg = !orgModuleEnabled[key];
                             const selected: StaffModuleKey[] =
-                              ((m as any)?.module_access as StaffModuleKey[] | null) ?? [];
-                            const checked = locked ? true : selected.includes(key);
+                              ((m as any)?.module_access as
+                                | StaffModuleKey[]
+                                | null) ?? [];
+                            const checked = locked
+                              ? true
+                              : selected.includes(key);
                             return (
                               <div
                                 key={key}
-                                className={`flex items-center justify-between p-2 rounded-md hover:bg-muted/50 ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                className={`flex items-center justify-between p-2 rounded-md hover:bg-muted/50 ${
+                                  locked || disabledByOrg
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "cursor-pointer"
+                                }`}
                                 onClick={(e) => {
-                                  if (locked) return;
+                                  if (locked || disabledByOrg) return;
                                   e.preventDefault();
-                                  const current = new Set<StaffModuleKey>(selected);
+                                  const current = new Set<StaffModuleKey>(
+                                    selected
+                                  );
                                   if (!checked) current.add(key);
                                   else current.delete(key);
                                   onModulesChange(m.id, Array.from(current));
                                 }}
                               >
                                 <div className="flex flex-col gap-0.5">
-                                  <span className="text-sm font-medium">{STAFF_MODULE_LABELS[key]}</span>
+                                  <span className="text-sm font-medium">
+                                    {STAFF_MODULE_LABELS[key]}
+                                  </span>
                                   <span className="text-[10px] text-muted-foreground">
-                                    {locked ? 'Required' : 'Enable access'}
+                                    {locked
+                                      ? "Required"
+                                      : disabledByOrg
+                                        ? "Disabled at organization level"
+                                        : "Enable access"}
                                   </span>
                                 </div>
-                                <Switch checked={checked} disabled={locked} />
+                                <Switch
+                                  checked={checked}
+                                  disabled={locked || disabledByOrg}
+                                />
                               </div>
                             );
                           })}
@@ -473,7 +598,7 @@ export function StaffSettings() {
                       disabled={!canManage}
                     />
                     <span className="text-xs text-muted-foreground w-12">
-                      {m.is_active ? 'Active' : 'Inactive'}
+                      {m.is_active ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </TableCell>
@@ -482,7 +607,10 @@ export function StaffSettings() {
 
             {staff.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-muted-foreground py-6"
+                >
                   No staff found.
                 </TableCell>
               </TableRow>
@@ -493,4 +621,3 @@ export function StaffSettings() {
     </div>
   );
 }
-

@@ -421,7 +421,9 @@ export default function ClientsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-2">{totalClients}</div>
+            <div className="text-3xl font-bold mb-2 font-figures tabular-nums">
+              {totalClients}
+            </div>
             <p className="text-xs text-muted-foreground">Active clients</p>
           </CardContent>
         </Card>
@@ -437,7 +439,7 @@ export default function ClientsPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mb-1">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mb-1 font-figures tabular-nums">
                   PKR {totalDues.toLocaleString()}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -463,7 +465,7 @@ export default function ClientsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-2 font-figures tabular-nums">
               PKR {totalSpent.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mb-3">
@@ -629,8 +631,8 @@ export default function ClientsPage() {
                             entry.name === "Luxury"
                               ? "url(#luxuryGradient)"
                               : entry.name === "Economy"
-                              ? "url(#economyGradient)"
-                              : "url(#midGradient)"
+                                ? "url(#economyGradient)"
+                                : "url(#midGradient)"
                           }
                         />
                       ))}
@@ -930,8 +932,8 @@ export default function ClientsPage() {
                               client.status === "active"
                                 ? "default"
                                 : client.status === "inactive"
-                                ? "secondary"
-                                : "destructive"
+                                  ? "secondary"
+                                  : "destructive"
                             }
                           >
                             {client.status}

@@ -4,58 +4,115 @@
 // These types mirror the Supabase schema for type-safe queries
 // =============================================================================
 
-export type SubscriptionStatus = 'trial' | 'active' | 'suspended' | 'cancelled';
-export type SubscriptionPlan = 'basic' | 'professional' | 'enterprise';
-export type UserRole = 'super_admin' | 'admin' | 'manager' | 'salesperson' | 'accountant';
-export type VehicleStatus = 'available' | 'reserved' | 'sold' | 'in_service';
-export type VehicleCondition = 'new' | 'used' | 'certified';
-export type FuelType = 'petrol' | 'diesel' | 'hybrid' | 'electric' | 'cng';
-export type Transmission = 'manual' | 'automatic';
-export type LeadSource = 'walk_in' | 'phone' | 'whatsapp' | 'website' | 'referral' | 'facebook' | 'other';
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'negotiating' | 'won' | 'lost';
-export type LeadPriority = 'low' | 'medium' | 'high';
-export type DealStatus = 'pending' | 'completed' | 'cancelled';
-export type PaymentMethod = 'cash' | 'bank_transfer' | 'easypaisa' | 'jazzcash' | 'financing' | 'cheque';
-export type SubscriptionPaymentMethod = 'easypaisa' | 'jazzcash' | 'bank_transfer' | 'stripe';
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
-export type DocumentType = 'cnic_front' | 'cnic_back' | 'registration' | 'invoice' | 'receipt' | 'other';
-export type EntityType = 'vehicle' | 'deal' | 'lead';
-export type InvestorStatus = 'active' | 'inactive' | 'closed';
-export type InvestmentTransactionType = 'investment' | 'withdrawal';
-export type InvestmentTransactionStatus = 'pending' | 'completed' | 'cancelled';
-export type InvestmentPaymentMethod = 'cash' | 'bank_transfer' | 'easypaisa' | 'jazzcash' | 'cheque';
-export type ClientStatus = 'active' | 'inactive' | 'blacklisted';
-export type ClientTransactionType = 'purchase' | 'sale' | 'payment' | 'refund';
-export type ClientTransactionStatus = 'pending' | 'completed' | 'cancelled' | 'refunded';
-export type FinancingType = 'finance' | 'lease';
-export type EMIPaymentStatus = 'pending' | 'completed' | 'late' | 'overdue' | 'waived';
-export type LoanStatus = 'active' | 'completed' | 'defaulted' | 'cancelled';
-export type CashTransactionType = 'cash_in' | 'cash_out' | 'expense';
-export type CashTransactionStatus = 'pending' | 'completed' | 'cancelled';
-export type RelatedEntityType = 'deal' | 'vehicle' | 'client' | 'investor' | 'other';
-export type DealershipType = 'local' | 'japan_import' | 'hybrid';
+export type SubscriptionStatus = "trial" | "active" | "suspended" | "cancelled";
+export type SubscriptionPlan = "basic" | "professional" | "enterprise";
+export type UserRole =
+  | "super_admin"
+  | "admin"
+  | "manager"
+  | "salesperson"
+  | "accountant";
+export type VehicleStatus = "available" | "reserved" | "sold" | "in_service";
+export type VehicleCondition = "new" | "used" | "certified";
+export type FuelType = "petrol" | "diesel" | "hybrid" | "electric" | "cng";
+export type Transmission = "manual" | "automatic";
+export type LeadSource =
+  | "walk_in"
+  | "phone"
+  | "whatsapp"
+  | "website"
+  | "referral"
+  | "facebook"
+  | "other";
+export type LeadStatus =
+  | "new"
+  | "contacted"
+  | "qualified"
+  | "negotiating"
+  | "won"
+  | "lost";
+export type LeadPriority = "low" | "medium" | "high";
+export type DealStatus = "pending" | "completed" | "cancelled";
+export type PaymentMethod =
+  | "cash"
+  | "bank_transfer"
+  | "easypaisa"
+  | "jazzcash"
+  | "financing"
+  | "cheque";
+export type SubscriptionPaymentMethod =
+  | "easypaisa"
+  | "jazzcash"
+  | "bank_transfer"
+  | "stripe";
+export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
+export type DocumentType =
+  | "cnic_front"
+  | "cnic_back"
+  | "registration"
+  | "invoice"
+  | "receipt"
+  | "other";
+export type EntityType = "vehicle" | "deal" | "lead";
+export type InvestorStatus = "active" | "inactive" | "closed";
+export type InvestmentTransactionType = "investment" | "withdrawal";
+export type InvestmentTransactionStatus = "pending" | "completed" | "cancelled";
+export type InvestmentPaymentMethod =
+  | "cash"
+  | "bank_transfer"
+  | "easypaisa"
+  | "jazzcash"
+  | "cheque";
+export type ClientStatus = "active" | "inactive" | "blacklisted";
+export type ClientTransactionType = "purchase" | "sale" | "payment" | "refund";
+export type ClientTransactionStatus =
+  | "pending"
+  | "completed"
+  | "cancelled"
+  | "refunded";
+export type FinancingType = "finance" | "lease";
+export type EMIPaymentStatus =
+  | "pending"
+  | "completed"
+  | "late"
+  | "overdue"
+  | "waived";
+export type LoanStatus = "active" | "completed" | "defaulted" | "cancelled";
+export type CashTransactionType = "cash_in" | "cash_out" | "expense";
+export type CashTransactionStatus = "pending" | "completed" | "cancelled";
+export type RelatedEntityType =
+  | "deal"
+  | "vehicle"
+  | "client"
+  | "investor"
+  | "other";
+export type DealershipType = "local" | "japan_import" | "hybrid";
 
 // Japan import module
 export type JapanImportStatus =
-  | 'planned'
-  | 'purchased'
-  | 'in_transit'
-  | 'arrived_port'
-  | 'customs'
-  | 'ready_for_sale'
-  | 'sold'
-  | 'cancelled';
+  | "planned"
+  | "purchased"
+  | "in_transit"
+  | "arrived_port"
+  | "customs"
+  | "ready_for_sale"
+  | "sold"
+  | "cancelled";
 
 export type JapanImportDocumentType =
-  | 'auction_sheet'
-  | 'export_certificate'
-  | 'bill_of_lading'
-  | 'invoice'
-  | 'inspection_report'
-  | 'customs_document'
-  | 'other';
+  | "auction_sheet"
+  | "export_certificate"
+  | "bill_of_lading"
+  | "invoice"
+  | "inspection_report"
+  | "customs_document"
+  | "other";
 
-export type JapanImportClearanceStatus = 'pending' | 'in_progress' | 'cleared' | 'held';
+export type JapanImportClearanceStatus =
+  | "pending"
+  | "in_progress"
+  | "cleared"
+  | "held";
 
 // Feature flags for organizations
 export interface FeatureFlags {
@@ -100,9 +157,66 @@ export interface PlatformStats {
   total_users: number;
   total_vehicles: number;
   total_leads: number;
+  active_leads?: number;
   total_deals: number;
   completed_deals: number;
   total_revenue: number;
+}
+
+export interface PlatformPublicSettings {
+  id: number;
+  maintenance_mode: boolean;
+  maintenance_message: string | null;
+  brand_name: string | null;
+  brand_primary_color: string | null;
+  brand_secondary_color: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlatformSettings {
+  id: number;
+  default_currency: string;
+  default_country: string;
+  default_timezone: string;
+  session_timeout_minutes: number;
+  support_email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlatformEmailTemplate {
+  id: string;
+  template_key: string;
+  name: string;
+  subject: string;
+  body: string;
+  is_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlatformSubscriptionPlan {
+  id: string;
+  code: string;
+  name: string;
+  price: number;
+  currency: string;
+  billing_period: "monthly" | "yearly";
+  limits: Record<string, unknown>;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlatformAuditLog {
+  id: string;
+  actor_user_id: string | null;
+  action: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  details: Record<string, unknown>;
+  created_at: string;
 }
 
 // =============================================================================
@@ -118,6 +232,7 @@ export interface Organization {
   city: string | null;
   phone: string | null;
   email: string | null;
+  owner_cnic?: string | null;
   subscription_status: SubscriptionStatus;
   subscription_plan: SubscriptionPlan;
   subscription_expires_at: string | null;
@@ -146,6 +261,7 @@ export interface Vehicle {
   make: string;
   model: string;
   variant: string | null;
+  body_type?: "sedan" | "suv" | "hatchback" | "truck" | "van" | "other" | null;
   year: number;
   color: string | null;
   registration_number: string | null;
@@ -216,7 +332,7 @@ export interface JapanImportDocument {
   document_type: JapanImportDocumentType;
   title: string | null;
   file_url: string;
-  status: 'pending' | 'verified' | 'rejected';
+  status: "pending" | "verified" | "rejected";
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -582,87 +698,93 @@ export type Database = {
     Tables: {
       organizations: {
         Row: Organization;
-        Insert: Omit<Organization, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Organization, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Organization, 'id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<Omit<Organization, "id" | "created_at" | "updated_at">>;
         Relationships: [];
       };
       profiles: {
         Row: Profile;
-        Insert: Omit<Profile, 'created_at' | 'updated_at' | 'email'> & {
+        Insert: Omit<Profile, "created_at" | "updated_at" | "email"> & {
           email?: string | null;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<Omit<Profile, "id" | "created_at" | "updated_at">>;
         Relationships: [];
       };
       vehicles: {
         Row: Vehicle;
-        Insert: Omit<Vehicle, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Vehicle, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<
-          Omit<Vehicle, 'id' | 'organization_id' | 'created_at' | 'updated_at'>
+          Omit<Vehicle, "id" | "organization_id" | "created_at" | "updated_at">
         >;
         Relationships: [];
       };
       vehicle_images: {
         Row: VehicleImage;
-        Insert: Omit<VehicleImage, 'id' | 'created_at'> & {
+        Insert: Omit<VehicleImage, "id" | "created_at"> & {
           id?: string;
           created_at?: string;
         };
-        Update: Partial<Omit<VehicleImage, 'id' | 'created_at'>>;
+        Update: Partial<Omit<VehicleImage, "id" | "created_at">>;
         Relationships: [];
       };
       leads: {
         Row: Lead;
-        Insert: Omit<Lead, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Lead, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Lead, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<Lead, "id" | "organization_id" | "created_at" | "updated_at">
+        >;
         Relationships: [];
       };
       deals: {
         Row: Deal;
-        Insert: Omit<Deal, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Deal, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Deal, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<Deal, "id" | "organization_id" | "created_at" | "updated_at">
+        >;
         Relationships: [];
       };
       documents: {
         Row: Document;
-        Insert: Omit<Document, 'id' | 'created_at'> & {
+        Insert: Omit<Document, "id" | "created_at"> & {
           id?: string;
           created_at?: string;
         };
-        Update: Partial<Omit<Document, 'id' | 'created_at'>>;
+        Update: Partial<Omit<Document, "id" | "created_at">>;
         Relationships: [];
       };
       payments: {
         Row: Payment;
-        Insert: Omit<Payment, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Payment, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Payment, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<Payment, "id" | "organization_id" | "created_at" | "updated_at">
+        >;
         Relationships: [];
       };
       activity_logs: {
         Row: ActivityLog;
-        Insert: Omit<ActivityLog, 'id' | 'created_at'> & {
+        Insert: Omit<ActivityLog, "id" | "created_at"> & {
           id?: string;
           created_at?: string;
         };
@@ -671,62 +793,148 @@ export type Database = {
       };
       investors: {
         Row: Investor;
-        Insert: Omit<Investor, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Investor, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Investor, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<Investor, "id" | "organization_id" | "created_at" | "updated_at">
+        >;
         Relationships: [];
       };
       investment_transactions: {
         Row: InvestmentTransaction;
-        Insert: Omit<InvestmentTransaction, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<
+          InvestmentTransaction,
+          "id" | "created_at" | "updated_at"
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<InvestmentTransaction, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<
+            InvestmentTransaction,
+            "id" | "organization_id" | "created_at" | "updated_at"
+          >
+        >;
         Relationships: [];
       };
       clients: {
         Row: Client;
-        Insert: Omit<Client, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<Client, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Client, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<Client, "id" | "organization_id" | "created_at" | "updated_at">
+        >;
         Relationships: [];
       };
       client_transactions: {
         Row: ClientTransaction;
-        Insert: Omit<ClientTransaction, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<ClientTransaction, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<ClientTransaction, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<
+            ClientTransaction,
+            "id" | "organization_id" | "created_at" | "updated_at"
+          >
+        >;
         Relationships: [];
       };
       expense_categories: {
         Row: ExpenseCategory;
-        Insert: Omit<ExpenseCategory, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<ExpenseCategory, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<ExpenseCategory, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<
+            ExpenseCategory,
+            "id" | "organization_id" | "created_at" | "updated_at"
+          >
+        >;
         Relationships: [];
       };
       cash_transactions: {
         Row: CashTransaction;
-        Insert: Omit<CashTransaction, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<CashTransaction, "id" | "created_at" | "updated_at"> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<CashTransaction, 'id' | 'organization_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<
+          Omit<
+            CashTransaction,
+            "id" | "organization_id" | "created_at" | "updated_at"
+          >
+        >;
+        Relationships: [];
+      };
+      platform_public_settings: {
+        Row: PlatformPublicSettings;
+        Insert: Omit<PlatformPublicSettings, "created_at" | "updated_at"> & {
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Omit<PlatformPublicSettings, "created_at" | "updated_at">
+        >;
+        Relationships: [];
+      };
+      platform_settings: {
+        Row: PlatformSettings;
+        Insert: Omit<PlatformSettings, "created_at" | "updated_at"> & {
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<PlatformSettings, "created_at" | "updated_at">>;
+        Relationships: [];
+      };
+      platform_email_templates: {
+        Row: PlatformEmailTemplate;
+        Insert: Omit<
+          PlatformEmailTemplate,
+          "id" | "created_at" | "updated_at"
+        > & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Omit<PlatformEmailTemplate, "id" | "created_at" | "updated_at">
+        >;
+        Relationships: [];
+      };
+      platform_subscription_plans: {
+        Row: PlatformSubscriptionPlan;
+        Insert: Omit<
+          PlatformSubscriptionPlan,
+          "id" | "created_at" | "updated_at"
+        > & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Omit<PlatformSubscriptionPlan, "id" | "created_at" | "updated_at">
+        >;
+        Relationships: [];
+      };
+      platform_audit_logs: {
+        Row: PlatformAuditLog;
+        Insert: Omit<PlatformAuditLog, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
         Relationships: [];
       };
     };
@@ -738,6 +946,10 @@ export type Database = {
       };
       has_role: {
         Args: { required_role: string };
+        Returns: boolean;
+      };
+      is_super_admin: {
+        Args: Record<string, never>;
         Returns: boolean;
       };
       get_investor_balance: {

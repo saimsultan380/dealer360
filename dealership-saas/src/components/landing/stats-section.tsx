@@ -77,7 +77,7 @@ export function StatsSection() {
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <stat.icon className="h-6 w-6" />
               </div>
-              <p className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              <p className="text-3xl md:text-4xl font-bold tracking-tight text-foreground font-figures tabular-nums">
                 {stat.value}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>

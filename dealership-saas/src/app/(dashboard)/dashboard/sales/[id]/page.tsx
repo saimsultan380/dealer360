@@ -453,7 +453,7 @@ export default async function SaleDetailPage({
                     <span className="font-medium">Net Profit</span>
                     <span
                       className={cn(
-                        "text-xl font-bold",
+                        "text-xl font-bold font-figures tabular-nums",
                         profit >= 0
                           ? "text-emerald-600 dark:text-emerald-400"
                           : "text-red-600 dark:text-red-400"

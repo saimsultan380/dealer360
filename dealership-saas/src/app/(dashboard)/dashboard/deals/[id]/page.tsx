@@ -179,7 +179,7 @@ function renderDealDetail(
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Sale Price</span>
-              <span className="font-bold text-lg">
+              <span className="font-bold text-lg font-figures tabular-nums">
                 PKR {parseFloat(deal.sale_price).toLocaleString()}
               </span>
             </div>
@@ -206,7 +206,7 @@ function renderDealDetail(
             )}
             <div className="flex items-center justify-between border-t pt-4">
               <span className="text-sm font-semibold">Remaining Amount</span>
-              <span className="font-bold text-lg text-primary">
+              <span className="font-bold text-lg text-primary font-figures tabular-nums">
                 PKR {remainingAmount.toLocaleString()}
               </span>
             </div>

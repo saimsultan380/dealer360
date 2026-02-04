@@ -26,7 +26,7 @@ export default async function InventoryPage({
 }) {
   const sp = await searchParams;
   const query = sp.q || "";
-  const status = sp.status || "available";
+  const status = sp.status || "all";
   const page = Number(sp.page) || 1;
   const limit = Number(sp.limit) || 10;
 
@@ -83,7 +83,9 @@ export default async function InventoryPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalVehicles}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {totalVehicles}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -94,7 +96,9 @@ export default async function InventoryPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{availableCount}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {availableCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -107,7 +111,7 @@ export default async function InventoryPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-figures tabular-nums">
               {reservedCount + inServiceCount}
             </div>
           </CardContent>
@@ -120,7 +124,7 @@ export default async function InventoryPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-figures tabular-nums">
               PKR {totalStockValue.toLocaleString()}
             </div>
           </CardContent>
@@ -136,7 +140,7 @@ export default async function InventoryPage({
       ) : null}
 
       <VehiclesTable
-        vehicles={vehicles as any}
+        vehicles={(Array.isArray(vehicles) ? vehicles : []) as any}
         pagination={{
           page: metadata?.page ?? page,
           limit: metadata?.limit ?? limit,

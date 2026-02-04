@@ -360,7 +360,9 @@ export function ProfilePageContent({
             <Car className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {stats.totalVehicles}
+            </div>
             <p className="text-xs text-muted-foreground">Total in inventory</p>
           </CardContent>
         </Card>
@@ -371,7 +373,9 @@ export function ProfilePageContent({
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSales}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {stats.totalSales}
+            </div>
             <p className="text-xs text-muted-foreground">Total sales</p>
           </CardContent>
         </Card>
@@ -382,7 +386,9 @@ export function ProfilePageContent({
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalClients}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {stats.totalClients}
+            </div>
             <p className="text-xs text-muted-foreground">Total clients</p>
           </CardContent>
         </Card>
@@ -393,7 +399,9 @@ export function ProfilePageContent({
             <HandshakeIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDeals}</div>
+            <div className="text-2xl font-bold font-figures tabular-nums">
+              {stats.totalDeals}
+            </div>
             <p className="text-xs text-muted-foreground">Total deals</p>
           </CardContent>
         </Card>

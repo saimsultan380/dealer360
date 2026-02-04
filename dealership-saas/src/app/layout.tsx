@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Prata } from "next/font/google";
+import { Inter, Prata, DM_Sans } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LanguageProvider } from "@/components/providers/language-provider";
+import { RouteChangeLoader } from "@/components/ui/route-change-loader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,6 +15,12 @@ const prata = Prata({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-prata",
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-figures",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${prata.variable} font-sans antialiased`}
+        className={`${inter.variable} ${prata.variable} ${dmSans.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <LanguageProvider>
@@ -49,6 +57,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Suspense fallback={null}>
+              <RouteChangeLoader />
+            </Suspense>
             {children}
           </ThemeProvider>
         </LanguageProvider>

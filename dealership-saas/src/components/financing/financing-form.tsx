@@ -1,28 +1,47 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertCircle, DollarSign } from 'lucide-react';
-import { createFinancingLoan } from '@/lib/actions/financing-loans';
-import { calculateEMI } from '@/lib/utils/financing-calculations';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, AlertCircle, DollarSign } from "lucide-react";
+import { createFinancingLoan } from "@/lib/actions/financing-loans";
+import { calculateEMI } from "@/lib/utils/financing-calculations";
+import { useRouter } from "next/navigation";
 
 const financingSchema = z.object({
-  financing_type: z.enum(['finance', 'lease']),
-  principal_amount: z.number().positive('Principal amount must be positive'),
-  down_payment: z.number().min(0, 'Down payment cannot be negative'),
-  annual_interest_rate: z.number().min(0).max(50, 'Interest rate must be 0-50%'),
-  loan_tenure_months: z.number().int().min(1).max(360, 'Tenure must be 1-360 months'),
-  vehicle_id: z.string().min(1, 'Please select a vehicle'),
+  financing_type: z.enum(["finance", "lease"]),
+  principal_amount: z.number().positive("Principal amount must be positive"),
+  down_payment: z.number().min(0, "Down payment cannot be negative"),
+  annual_interest_rate: z
+    .number()
+    .min(0)
+    .max(50, "Interest rate must be 0-50%"),
+  loan_tenure_months: z
+    .number()
+    .int()
+    .min(1)
+    .max(360, "Tenure must be 1-360 months"),
+  vehicle_id: z.string().min(1, "Please select a vehicle"),
   customer_id: z.string().optional(),
   sale_id: z.string().optional(),
   bank_name: z.string().optional(),
@@ -42,7 +61,12 @@ interface FinancingFormProps {
   onSubmit?: (data: FinancingFormData) => void;
 }
 
-export function FinancingForm({ vehicles, customers = [], initialData, onSubmit }: FinancingFormProps) {
+export function FinancingForm({
+  vehicles,
+  customers = [],
+  initialData,
+  onSubmit,
+}: FinancingFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [calculatedEMI, setCalculatedEMI] = useState<number | null>(null);
@@ -57,15 +81,15 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
   } = useForm<FinancingFormData>({
     resolver: zodResolver(financingSchema),
     defaultValues: initialData || {
-      financing_type: 'finance',
+      financing_type: "finance",
       annual_interest_rate: 12,
     },
   });
 
-  const principal = watch('principal_amount');
-  const downPayment = watch('down_payment');
-  const rate = watch('annual_interest_rate');
-  const months = watch('loan_tenure_months');
+  const principal = watch("principal_amount");
+  const downPayment = watch("down_payment");
+  const rate = watch("annual_interest_rate");
+  const months = watch("loan_tenure_months");
 
   // Calculate EMI whenever inputs change
   useEffect(() => {
@@ -90,13 +114,13 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
         router.push(`/dashboard/financing/${result.data?.id}`);
       }
     } catch (err) {
-      setError('Failed to create financing loan');
+      setError("Failed to create financing loan");
     } finally {
       setLoading(false);
     }
   };
 
-  const loanAmount = principal ? (principal - (downPayment || 0)) : 0;
+  const loanAmount = principal ? principal - (downPayment || 0) : 0;
   const totalPayable = calculatedEMI ? calculatedEMI * months : 0;
   const totalInterest = totalPayable - loanAmount;
 
@@ -121,9 +145,9 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
               <div className="space-y-2">
                 <Label htmlFor="financing_type">Type *</Label>
                 <Select
-                  defaultValue={initialData?.financing_type || 'finance'}
+                  defaultValue={initialData?.financing_type || "finance"}
                   onValueChange={(value) =>
-                    setValue('financing_type', value as 'finance' | 'lease')
+                    setValue("financing_type", value as "finance" | "lease")
                   }
                 >
                   <SelectTrigger id="financing_type" className="w-full">
@@ -138,7 +162,9 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
 
               <div className="space-y-2">
                 <Label htmlFor="vehicle_id">Vehicle *</Label>
-                <Select onValueChange={(value) => setValue('vehicle_id', value)}>
+                <Select
+                  onValueChange={(value) => setValue("vehicle_id", value)}
+                >
                   <SelectTrigger id="vehicle_id" className="w-full">
                     <SelectValue placeholder="Select vehicle" />
                   </SelectTrigger>
@@ -150,14 +176,20 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.vehicle_id && <p className="text-sm text-red-500">{errors.vehicle_id.message}</p>}
+                {errors.vehicle_id && (
+                  <p className="text-sm text-red-500">
+                    {errors.vehicle_id.message}
+                  </p>
+                )}
               </div>
             </div>
 
             {customers.length > 0 && (
               <div className="space-y-2">
                 <Label htmlFor="customer_id">Customer</Label>
-                <Select onValueChange={(value) => setValue('customer_id', value)}>
+                <Select
+                  onValueChange={(value) => setValue("customer_id", value)}
+                >
                   <SelectTrigger id="customer_id" className="w-full">
                     <SelectValue placeholder="Select customer" />
                   </SelectTrigger>
@@ -181,21 +213,27 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
               <DollarSign className="h-5 w-5" />
               Loan Amount Details
             </CardTitle>
-            <CardDescription>Enter principal amount and down payment</CardDescription>
+            <CardDescription>
+              Enter principal amount and down payment
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="principal_amount">Principal Amount (PKR) *</Label>
+                <Label htmlFor="principal_amount">
+                  Principal Amount (PKR) *
+                </Label>
                 <Input
                   id="principal_amount"
                   type="number"
                   placeholder="2,500,000"
-                  {...register('principal_amount', { valueAsNumber: true })}
-                  className={errors.principal_amount ? 'border-red-500' : ''}
+                  {...register("principal_amount", { valueAsNumber: true })}
+                  className={errors.principal_amount ? "border-red-500" : ""}
                 />
                 {errors.principal_amount && (
-                  <p className="text-sm text-red-500">{errors.principal_amount.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.principal_amount.message}
+                  </p>
                 )}
               </div>
 
@@ -205,7 +243,7 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
                   id="down_payment"
                   type="number"
                   placeholder="500,000"
-                  {...register('down_payment', { valueAsNumber: true })}
+                  {...register("down_payment", { valueAsNumber: true })}
                 />
               </div>
             </div>
@@ -214,7 +252,10 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
             {loanAmount > 0 && (
               <div className="rounded-lg bg-blue-50 dark:bg-blue-950 p-4">
                 <p className="text-sm text-muted-foreground">
-                  Loan Amount: <span className="font-semibold text-blue-700 dark:text-blue-300">PKR {loanAmount.toLocaleString()}</span>
+                  Loan Amount:{" "}
+                  <span className="font-semibold text-blue-700 dark:text-blue-300">
+                    PKR {loanAmount.toLocaleString()}
+                  </span>
                 </p>
               </div>
             )}
@@ -225,22 +266,30 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
         <Card>
           <CardHeader>
             <CardTitle>Interest & Tenure</CardTitle>
-            <CardDescription>Set interest rate and loan duration</CardDescription>
+            <CardDescription>
+              Set interest rate and loan duration
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="annual_interest_rate">Annual Interest Rate (%) *</Label>
+                <Label htmlFor="annual_interest_rate">
+                  Annual Interest Rate (%) *
+                </Label>
                 <Input
                   id="annual_interest_rate"
                   type="number"
                   placeholder="12"
                   step="0.5"
-                  {...register('annual_interest_rate', { valueAsNumber: true })}
-                  className={errors.annual_interest_rate ? 'border-red-500' : ''}
+                  {...register("annual_interest_rate", { valueAsNumber: true })}
+                  className={
+                    errors.annual_interest_rate ? "border-red-500" : ""
+                  }
                 />
                 {errors.annual_interest_rate && (
-                  <p className="text-sm text-red-500">{errors.annual_interest_rate.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.annual_interest_rate.message}
+                  </p>
                 )}
               </div>
 
@@ -250,11 +299,13 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
                   id="loan_tenure_months"
                   type="number"
                   placeholder="60"
-                  {...register('loan_tenure_months', { valueAsNumber: true })}
-                  className={errors.loan_tenure_months ? 'border-red-500' : ''}
+                  {...register("loan_tenure_months", { valueAsNumber: true })}
+                  className={errors.loan_tenure_months ? "border-red-500" : ""}
                 />
                 {errors.loan_tenure_months && (
-                  <p className="text-sm text-red-500">{errors.loan_tenure_months.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.loan_tenure_months.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -265,23 +316,31 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
         {calculatedEMI && (
           <Card className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
             <CardHeader>
-              <CardTitle className="text-green-900 dark:text-green-100">EMI Calculation</CardTitle>
+              <CardTitle className="text-green-900 dark:text-green-100">
+                EMI Calculation
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Monthly EMI</p>
-                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300 font-figures tabular-nums">
                     PKR {calculatedEMI.toLocaleString()}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Payable</p>
-                  <p className="text-2xl font-bold">PKR {totalPayable.toLocaleString()}</p>
+                  <p className="text-2xl font-bold font-figures tabular-nums">
+                    PKR {totalPayable.toLocaleString()}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Interest</p>
-                  <p className="text-2xl font-bold">PKR {totalInterest.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Interest
+                  </p>
+                  <p className="text-2xl font-bold font-figures tabular-nums">
+                    PKR {totalInterest.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -298,22 +357,40 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="bank_name">Bank/Lender Name</Label>
-                <Input id="bank_name" placeholder="HBL / UBL / Private Lender" {...register('bank_name')} />
+                <Input
+                  id="bank_name"
+                  placeholder="HBL / UBL / Private Lender"
+                  {...register("bank_name")}
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bank_reference_number">Bank Reference Number</Label>
-                <Input id="bank_reference_number" placeholder="HBL-2024-001234" {...register('bank_reference_number')} />
+                <Label htmlFor="bank_reference_number">
+                  Bank Reference Number
+                </Label>
+                <Input
+                  id="bank_reference_number"
+                  placeholder="HBL-2024-001234"
+                  {...register("bank_reference_number")}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="contact_person">Contact Person</Label>
-                <Input id="contact_person" placeholder="Manager name" {...register('contact_person')} />
+                <Input
+                  id="contact_person"
+                  placeholder="Manager name"
+                  {...register("contact_person")}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="contact_number">Contact Number</Label>
-                <Input id="contact_number" placeholder="03001234567" {...register('contact_number')} />
+                <Input
+                  id="contact_number"
+                  placeholder="03001234567"
+                  {...register("contact_number")}
+                />
               </div>
             </div>
           </CardContent>
@@ -332,7 +409,7 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
                 id="terms_and_conditions"
                 placeholder="Enter terms and conditions..."
                 rows={3}
-                {...register('terms_and_conditions')}
+                {...register("terms_and_conditions")}
               />
             </div>
 
@@ -342,7 +419,7 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
                 id="notes"
                 placeholder="Any additional notes..."
                 rows={3}
-                {...register('notes')}
+                {...register("notes")}
               />
             </div>
           </CardContent>
@@ -350,13 +427,9 @@ export function FinancingForm({ vehicles, customers = [], initialData, onSubmit 
 
         {/* Submit Button */}
         <div className="flex gap-3">
-          <Button
-            type="submit"
-            disabled={loading}
-            className="gap-2"
-          >
+          <Button type="submit" disabled={loading} className="gap-2">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {loading ? 'Creating...' : 'Create Financing'}
+            {loading ? "Creating..." : "Create Financing"}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()}>
             Cancel

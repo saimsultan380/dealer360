@@ -1,30 +1,37 @@
-'use server';
+"use server";
 
-import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
-import type { DealershipType, FeatureFlags, Organization, UserRole } from '@/lib/types/database';
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import type {
+  DealershipType,
+  FeatureFlags,
+  Organization,
+  UserRole,
+} from "@/lib/types/database";
 
 export type OrgModuleKey =
-  | 'inventory'
-  | 'sales'
-  | 'exchange_deals'
-  | 'financing'
-  | 'leads'
-  | 'deals'
-  | 'documents'
-  | 'cash_flow'
-  | 'ledger'
-  | 'clients'
-  | 'investors'
-  | 'japan_import'
-  | 'import_documents'
-  | 'import_shipments'
-  | 'import_customs'
-  | 'import_inspections';
+  | "inventory"
+  | "sales"
+  | "exchange_deals"
+  | "financing"
+  | "leads"
+  | "deals"
+  | "documents"
+  | "cash_flow"
+  | "ledger"
+  | "clients"
+  | "investors"
+  | "japan_import"
+  | "import_documents"
+  | "import_shipments"
+  | "import_customs"
+  | "import_inspections";
 
 export type OrgModulesConfig = Record<OrgModuleKey, boolean>;
 
-function normalizeFeatureFlags(flags: FeatureFlags | null | undefined): FeatureFlags {
+function normalizeFeatureFlags(
+  flags: FeatureFlags | null | undefined
+): FeatureFlags {
   return {
     max_vehicles: flags?.max_vehicles ?? 100,
     max_users: flags?.max_users ?? 10,
@@ -33,7 +40,7 @@ function normalizeFeatureFlags(flags: FeatureFlags | null | undefined): FeatureF
     enable_deals: flags?.enable_deals ?? true,
     enable_analytics: flags?.enable_analytics ?? true,
 
-    dealership_type: flags?.dealership_type ?? 'local',
+    dealership_type: flags?.dealership_type ?? "local",
 
     enable_inventory: flags?.enable_inventory ?? true,
     enable_sales: flags?.enable_sales ?? true,
@@ -82,13 +89,14 @@ function mergeFeatureFlags(params: {
   const current = normalizeFeatureFlags(params.current);
   const modules = params.modules ?? {};
 
-  return {
+  const merged: FeatureFlags = {
     ...current,
     dealership_type: params.dealershipType ?? current.dealership_type,
 
     enable_inventory: modules.inventory ?? current.enable_inventory,
     enable_sales: modules.sales ?? current.enable_sales,
-    enable_exchange_deals: modules.exchange_deals ?? current.enable_exchange_deals,
+    enable_exchange_deals:
+      modules.exchange_deals ?? current.enable_exchange_deals,
     enable_financing: modules.financing ?? current.enable_financing,
     enable_leads: modules.leads ?? current.enable_leads,
     enable_deals: modules.deals ?? current.enable_deals,
@@ -99,30 +107,50 @@ function mergeFeatureFlags(params: {
     enable_investors: modules.investors ?? current.enable_investors,
 
     enable_japan_import: modules.japan_import ?? current.enable_japan_import,
-    enable_import_documents: modules.import_documents ?? current.enable_import_documents,
-    enable_import_shipments: modules.import_shipments ?? current.enable_import_shipments,
-    enable_import_customs: modules.import_customs ?? current.enable_import_customs,
-    enable_import_inspections: modules.import_inspections ?? current.enable_import_inspections,
+    enable_import_documents:
+      modules.import_documents ?? current.enable_import_documents,
+    enable_import_shipments:
+      modules.import_shipments ?? current.enable_import_shipments,
+    enable_import_customs:
+      modules.import_customs ?? current.enable_import_customs,
+    enable_import_inspections:
+      modules.import_inspections ?? current.enable_import_inspections,
   };
+
+  // Safety: when dealership is local-only, Japan import modules must be off.
+  if ((merged.dealership_type ?? "local") === "local") {
+    merged.enable_japan_import = false;
+    merged.enable_import_documents = false;
+    merged.enable_import_shipments = false;
+    merged.enable_import_customs = false;
+    merged.enable_import_inspections = false;
+  }
+
+  return merged;
 }
 
-async function requireOrgAdminRole(): Promise<{ orgId: string; role: UserRole }> {
+async function requireOrgAdminRole(): Promise<{
+  orgId: string;
+  role: UserRole;
+}> {
   const supabase = (await createClient()) as any;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
 
   const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('organization_id, role')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("organization_id, role")
+    .eq("id", user.id)
     .single();
 
   if (error) throw new Error(error.message);
-  if (!profile?.organization_id) throw new Error('No organization found');
+  if (!profile?.organization_id) throw new Error("No organization found");
 
-  const role = (profile.role ?? 'salesperson') as UserRole;
-  if (role !== 'admin' && role !== 'manager' && role !== 'super_admin') {
-    throw new Error('Insufficient permissions');
+  const role = (profile.role ?? "salesperson") as UserRole;
+  if (role !== "admin" && role !== "manager" && role !== "super_admin") {
+    throw new Error("Insufficient permissions");
   }
 
   return { orgId: profile.organization_id as string, role };
@@ -134,33 +162,40 @@ export async function getOrganizationModuleConfig(): Promise<{
 }> {
   try {
     const supabase = (await createClient()) as any;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { data: null, error: 'Unauthorized' };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: "Unauthorized" };
 
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user.id)
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
       .single();
-    if (!profile?.organization_id) return { data: null, error: 'No organization found' };
+    if (!profile?.organization_id)
+      return { data: null, error: "No organization found" };
 
     const { data: org, error } = await supabase
-      .from('organizations')
-      .select('feature_flags')
-      .eq('id', profile.organization_id)
+      .from("organizations")
+      .select("feature_flags")
+      .eq("id", profile.organization_id)
       .single();
     if (error) return { data: null, error: error.message };
 
     const flags = normalizeFeatureFlags((org as any)?.feature_flags);
     return {
       data: {
-        dealership_type: (flags.dealership_type ?? 'local') as DealershipType,
+        dealership_type: (flags.dealership_type ?? "local") as DealershipType,
         modules: getModulesFromFeatureFlags(flags),
       },
       error: null,
     };
   } catch (err) {
-    return { data: null, error: err instanceof Error ? err.message : 'Failed to load module config' };
+    return {
+      data: null,
+      error:
+        err instanceof Error ? err.message : "Failed to load module config",
+    };
   }
 }
 
@@ -173,9 +208,9 @@ export async function updateOrganizationModuleConfig(params: {
     const supabase = (await createClient()) as any;
 
     const { data: org, error: getErr } = await supabase
-      .from('organizations')
-      .select('*')
-      .eq('id', orgId)
+      .from("organizations")
+      .select("*")
+      .eq("id", orgId)
       .single();
     if (getErr) return { data: null, error: getErr.message };
 
@@ -186,19 +221,22 @@ export async function updateOrganizationModuleConfig(params: {
     });
 
     const { data: updated, error } = await supabase
-      .from('organizations')
+      .from("organizations")
       .update({ feature_flags: nextFlags })
-      .eq('id', orgId)
-      .select('*')
+      .eq("id", orgId)
+      .select("*")
       .single();
 
     if (error) return { data: null, error: error.message };
 
-    revalidatePath('/dashboard/settings');
-    revalidatePath('/dashboard');
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard");
     return { data: updated as any, error: null };
   } catch (err) {
-    return { data: null, error: err instanceof Error ? err.message : 'Failed to update module config' };
+    return {
+      data: null,
+      error:
+        err instanceof Error ? err.message : "Failed to update module config",
+    };
   }
 }
-

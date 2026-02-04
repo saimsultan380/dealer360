@@ -154,10 +154,11 @@ export function PricingSection() {
               plan.monthlyPrice === null
                 ? null
                 : isAnnual
-                ? Math.round(
-                    (plan.monthlyPrice * (100 - ANNUAL_DISCOUNT_PERCENT)) / 100
-                  )
-                : plan.monthlyPrice;
+                  ? Math.round(
+                      (plan.monthlyPrice * (100 - ANNUAL_DISCOUNT_PERCENT)) /
+                        100
+                    )
+                  : plan.monthlyPrice;
             const yearlyTotal = price === null ? null : price * 12;
             const displayPrice = price === null ? "Custom" : formatPrice(price);
             const displayYearly =
@@ -166,8 +167,8 @@ export function PricingSection() {
               price === null
                 ? null
                 : isAnnual
-                ? "per month, billed annually"
-                : "per month";
+                  ? "per month, billed annually"
+                  : "per month";
 
             return (
               <div
@@ -195,7 +196,7 @@ export function PricingSection() {
                 </div>
 
                 <div className="mb-8">
-                  <span className="text-4xl font-bold tracking-tight text-foreground">
+                  <span className="text-4xl font-bold tracking-tight text-foreground font-figures tabular-nums">
                     {displayPrice === "Custom"
                       ? "Custom"
                       : `PKR ${displayPrice}`}

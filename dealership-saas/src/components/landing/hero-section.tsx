@@ -234,8 +234,8 @@ export function HeroSection() {
               />
             </div>
 
-            {/* Floating cards */}
-            <div className="hero-float absolute -bottom-6 left-4 sm:left-6 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-xl backdrop-blur-md dark:bg-background/40">
+            {/* Floating cards — desktop only so they don't cover the image on mobile */}
+            <div className="hero-float absolute -bottom-6 left-4 sm:left-6 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-xl backdrop-blur-md dark:bg-background/40 hidden md:flex">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold">
                   ₨
@@ -249,7 +249,7 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="hero-float absolute top-10 -right-3 sm:top-14 sm:-right-6 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-xl backdrop-blur-md dark:bg-background/40">
+            <div className="hero-float absolute top-10 -right-3 sm:top-14 sm:-right-6 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-xl backdrop-blur-md dark:bg-background/40 hidden md:flex">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-blue-500/15 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
                   +
@@ -263,7 +263,7 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="hero-float absolute -top-5 left-10 sm:left-14 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-xl backdrop-blur-md dark:bg-background/40">
+            <div className="hero-float absolute -top-5 left-10 sm:left-14 rounded-2xl border border-border bg-background/80 px-4 py-3 shadow-xl backdrop-blur-md dark:bg-background/40 hidden md:flex">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center text-primary font-bold">
                   <Car className="h-5 w-5" />
@@ -272,6 +272,43 @@ export function HeroSection() {
                   <p className="text-xs text-muted-foreground">Inventory</p>
                   <p className="text-base font-bold text-foreground">
                     148 vehicles
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile: compact stats row below image so nothing overlaps */}
+            <div className="flex md:hidden mt-3 gap-2">
+              <div className="flex-1 min-w-0 flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-2 dark:bg-background/40">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-primary/15 flex items-center justify-center text-primary">
+                  <Car className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground">Inventory</p>
+                  <p className="text-xs font-bold text-foreground truncate">
+                    148
+                  </p>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0 flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-2 dark:bg-background/40">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm">
+                  +
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground">Leads</p>
+                  <p className="text-xs font-bold text-foreground truncate">
+                    12
+                  </p>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0 flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-2 dark:bg-background/40">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-xs">
+                  ₨
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground">Revenue</p>
+                  <p className="text-xs font-bold text-foreground truncate">
+                    2.4M
                   </p>
                 </div>
               </div>
