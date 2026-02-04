@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { LogOut, Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,7 +26,13 @@ import { AdminMobileSidebar } from "@/components/layout/admin-mobile-sidebar";
 
 export function AdminHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const { profile } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const initials =
     profile?.full_name
@@ -44,7 +51,7 @@ export function AdminHeader() {
     <header className="fixed top-0 right-0 left-0 md:left-64 z-30 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur px-3 sm:px-6">
       <div className="flex items-center gap-3">
         {/* Mobile menu */}
-        <Sheet>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"

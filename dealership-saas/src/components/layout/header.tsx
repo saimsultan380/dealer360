@@ -59,6 +59,7 @@ export function Header() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [brandLogoError, setBrandLogoError] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Get module name from pathname
   const getModuleName = () => {
@@ -134,6 +135,11 @@ export function Header() {
     setBrandLogoError(false);
   }, [organization?.logo_url]);
 
+  // Close mobile sidebar when route changes (e.g. after clicking a nav link)
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -176,7 +182,7 @@ export function Header() {
       {/* Left Side - Mobile Menu, Brand, Module */}
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 pr-2 sm:pr-4 md:pr-6">
         {/* Mobile Menu Button */}
-        <Sheet>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
@@ -187,7 +193,7 @@ export function Header() {
               <span className="sr-only">Open menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-64 max-w-[85vw] p-0">
             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             <MobileSidebar />
           </SheetContent>
