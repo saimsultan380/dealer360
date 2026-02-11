@@ -138,17 +138,26 @@ export default function ClientDetailPage({
         onRefresh={() => fetchData(clientId)}
       />
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4">
+        {/* Row 1: Back button */}
+        <div className="flex items-center">
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/clients")}
+            className="shrink-0"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
+        </div>
+
+        {/* Row 2: Avatar + name + subtitle + Edit button (single row) */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Avatar
+              className="h-16 w-16 shrink-0"
+              key={`${client.id}-${client.avatar_url ?? ""}`}
+            >
               <AvatarImage
                 src={getClientAvatarUrl(client.avatar_url) ?? undefined}
                 alt={client.name}
@@ -158,23 +167,25 @@ export default function ClientDetailPage({
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {client.name}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Client details and transaction history
               </p>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/dashboard/clients/${client.id}/edit`)}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/dashboard/clients/${client.id}/edit`)}
+              className="gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
 

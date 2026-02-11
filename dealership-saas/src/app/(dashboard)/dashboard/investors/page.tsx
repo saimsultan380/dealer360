@@ -145,10 +145,15 @@ export default function InvestorsPage() {
             Manage investors and their investments
           </p>
         </div>
-        <Button onClick={() => router.push("/dashboard/investors/new")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Investor
-        </Button>
+        <div className="flex">
+          <Button
+            onClick={() => router.push("/dashboard/investors/new")}
+            className="w-auto self-start sm:self-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Investor
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -206,7 +211,7 @@ export default function InvestorsPage() {
       {/* Investors Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>All Investors</CardTitle>
               <CardDescription>
@@ -214,14 +219,14 @@ export default function InvestorsPage() {
                 {filteredInvestors.length !== 1 ? "s" : ""}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search investors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 w-64"
+                  className="pl-8 w-full"
                 />
               </div>
             </div>

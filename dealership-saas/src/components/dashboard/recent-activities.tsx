@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Pagination } from '@/components/ui/pagination-advanced';
 import {
     Car,
     ShoppingCart,
@@ -18,7 +20,7 @@ import {
     ArrowRight,
     RefreshCw,
 } from 'lucide-react';
-import { getRecentActivities, RecentActivity } from '@/lib/actions/recent-activities';
+import { getRecentActivities, RecentActivity, DateFilter } from '@/lib/actions/recent-activities';
 import { cn } from '@/lib/utils';
 
 function ActivityIcon({ type }: { type: RecentActivity['type'] }) {
@@ -114,21 +116,28 @@ interface RecentActivitiesProps {
     limit?: number;
 }
 
-export function RecentActivities({ limit = 20 }: RecentActivitiesProps) {
+export function RecentActivities({ limit: initialLimit = 20 }: RecentActivitiesProps) {
     const router = useRouter();
     const [activities, setActivities] = useState<RecentActivity[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(initialLimit);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
-    const fetchActivities = async () => {
+    const fetchActivities = useCallback(async () => {
         try {
             setRefreshing(true);
-            const result = await getRecentActivities(limit);
+            const result = await getRecentActivities(pageSize, page, dateFilter);
             if (result.error && result.error !== 'Unauthorized' && result.error !== 'No organization found') {
                 setError(result.error);
             } else {
                 setActivities(result.data || []);
+                setTotal(result.total || 0);
+                setTotalPages(result.totalPages || 0);
                 setError(null);
             }
         } catch (err) {
@@ -138,11 +147,15 @@ export function RecentActivities({ limit = 20 }: RecentActivitiesProps) {
             setLoading(false);
             setRefreshing(false);
         }
-    };
+    }, [pageSize, page, dateFilter]);
+
+    useEffect(() => {
+        setPage(1); // Reset to first page when filter changes
+    }, [dateFilter]);
 
     useEffect(() => {
         fetchActivities();
-    }, [limit]);
+    }, [fetchActivities]);
 
     if (loading) {
         return (
@@ -197,7 +210,7 @@ export function RecentActivities({ limit = 20 }: RecentActivitiesProps) {
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <CardTitle>Recent Activity</CardTitle>
                         <CardDescription>Latest updates from all modules</CardDescription>
@@ -211,66 +224,101 @@ export function RecentActivities({ limit = 20 }: RecentActivitiesProps) {
                         <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
                     </Button>
                 </div>
+                
+                {/* Date Filter Tabs */}
+                <Tabs value={dateFilter} onValueChange={(value) => setDateFilter(value as DateFilter)} className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="today" className="text-xs sm:text-sm">Today</TabsTrigger>
+                        <TabsTrigger value="last_week" className="text-xs sm:text-sm">Last Week</TabsTrigger>
+                        <TabsTrigger value="last_month" className="text-xs sm:text-sm">Last Month</TabsTrigger>
+                        <TabsTrigger value="all" className="text-xs sm:text-sm">All Time</TabsTrigger>
+                    </TabsList>
+                </Tabs>
             </CardHeader>
             <CardContent>
                 {activities.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>No recent activity</p>
-                        <p className="text-sm mt-2">Activities will appear here as you use the system</p>
+                        <p className="text-sm mt-2">
+                            {dateFilter === 'all' 
+                                ? 'Activities will appear here as you use the system'
+                                : `No activities found for ${dateFilter === 'today' ? 'today' : dateFilter === 'last_week' ? 'the last week' : 'the last month'}`
+                            }
+                        </p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
-                        {activities.map((activity) => (
-                            <div
-                                key={activity.id}
-                                className={cn(
-                                    'flex items-start gap-4 p-3 rounded-lg border transition-colors',
-                                    activity.link && 'hover:bg-accent cursor-pointer'
-                                )}
-                                onClick={() => activity.link && router.push(activity.link)}
-                            >
+                    <>
+                        <div className="space-y-4">
+                            {activities.map((activity) => (
                                 <div
+                                    key={activity.id}
                                     className={cn(
-                                        'h-10 w-10 rounded-lg flex items-center justify-center shrink-0',
-                                        activity.type === 'vehicle' && 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-                                        activity.type === 'sale' && 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-                                        activity.type === 'investor' && 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-                                        activity.type === 'cash_flow' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-                                        activity.type === 'client' && 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
-                                        activity.type === 'deal' && 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
-                                        activity.type === 'lead' && 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+                                        'flex items-start gap-4 p-3 rounded-lg border transition-colors',
+                                        activity.link && 'hover:bg-accent cursor-pointer'
                                     )}
+                                    onClick={() => activity.link && router.push(activity.link)}
                                 >
-                                    <ActivityIcon type={activity.type} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-sm">{activity.title}</p>
-                                            <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                                                {activity.description}
-                                            </p>
-                                            {activity.amount && (
-                                                <p className="text-sm font-semibold text-primary mt-1">
-                                                    PKR {activity.amount.toLocaleString()}
+                                    <div
+                                        className={cn(
+                                            'h-10 w-10 rounded-lg flex items-center justify-center shrink-0',
+                                            activity.type === 'vehicle' && 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+                                            activity.type === 'sale' && 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+                                            activity.type === 'investor' && 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                                            activity.type === 'cash_flow' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                                            activity.type === 'client' && 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+                                            activity.type === 'deal' && 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+                                            activity.type === 'lead' && 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+                                        )}
+                                    >
+                                        <ActivityIcon type={activity.type} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium text-sm">{activity.title}</p>
+                                                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                                                    {activity.description}
                                                 </p>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col items-end gap-2 shrink-0">
-                                            <ActivityBadge type={activity.type} status={activity.status} />
-                                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                                {formatTimeAgo(activity.timestamp)}
-                                            </span>
+                                                {activity.amount && (
+                                                    <p className="text-sm font-semibold text-primary mt-1">
+                                                        PKR {activity.amount.toLocaleString()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2 shrink-0">
+                                                <ActivityBadge type={activity.type} status={activity.status} />
+                                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                    {formatTimeAgo(activity.timestamp)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
+                                    {activity.link && (
+                                        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+                                    )}
                                 </div>
-                                {activity.link && (
-                                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
-                                )}
+                            ))}
+                        </div>
+                        
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="mt-6 pt-6 border-t">
+                                <Pagination
+                                    currentPage={page}
+                                    totalPages={totalPages}
+                                    totalItems={total}
+                                    itemsPerPage={pageSize}
+                                    onPageChange={setPage}
+                                    onItemsPerPageChange={(newSize) => {
+                                        setPageSize(newSize);
+                                        setPage(1);
+                                    }}
+                                    isLoading={refreshing}
+                                />
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )}
             </CardContent>
         </Card>

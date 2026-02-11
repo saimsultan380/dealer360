@@ -123,7 +123,7 @@ export function ExpenseCategoryDialog({ open, onOpenChange }: ExpenseCategoryDia
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-full max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Manage Expense Categories</DialogTitle>
                     <DialogDescription>
@@ -160,13 +160,13 @@ export function ExpenseCategoryDialog({ open, onOpenChange }: ExpenseCategoryDia
 
                             <div className="space-y-2">
                                 <Label>Color</Label>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                     {PRESET_COLORS.map((color) => (
                                         <button
                                             key={color}
                                             type="button"
                                             onClick={() => setSelectedColor(color)}
-                                            className={`w-10 h-10 rounded-full border-2 transition-all ${
+                                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 transition-all ${
                                                 selectedColor === color
                                                     ? 'border-foreground scale-110'
                                                     : 'border-border hover:scale-105'

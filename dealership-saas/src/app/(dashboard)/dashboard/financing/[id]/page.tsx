@@ -88,22 +88,31 @@ export default function FinancingDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{loan.bank_name || 'Financing Agreement'}</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold">
+              {loan.bank_name || 'Financing Agreement'}
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               {loan.financing_type === 'finance' ? 'Vehicle Finance' : 'Vehicle Lease'} Agreement
             </p>
           </div>
         </div>
-        <Button variant="outline" className="gap-2">
-          <Edit2 className="h-4 w-4" />
-          Edit
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Button variant="outline" className="gap-2">
+            <Edit2 className="h-4 w-4" />
+            Edit
+          </Button>
+        </div>
       </div>
 
       {/* Status Badges */}

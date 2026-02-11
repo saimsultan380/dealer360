@@ -401,13 +401,15 @@ export default function ClientsPage() {
             Manage clients and their purchase history
           </p>
         </div>
-        <Button
-          onClick={() => router.push("/dashboard/clients/new")}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Client
-        </Button>
+        <div className="flex">
+          <Button
+            onClick={() => router.push("/dashboard/clients/new")}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-auto self-start sm:self-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Client
+          </Button>
+        </div>
       </div>
 
       {/* Enhanced Summary Cards */}

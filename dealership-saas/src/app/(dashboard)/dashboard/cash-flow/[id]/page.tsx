@@ -118,30 +118,40 @@ export default function CashTransactionDetailPage({ params }: { params: Promise<
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" onClick={() => router.push('/dashboard/cash-flow')}>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.push('/dashboard/cash-flow')}
+                        className="shrink-0"
+                    >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Transaction Details</h1>
-                        <p className="text-muted-foreground">View transaction information</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                            Transaction Details
+                        </h1>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                            View transaction information
+                        </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-auto">
                     <Button
                         variant="outline"
                         onClick={() => router.push(`/dashboard/cash-flow/${transaction.id}/edit`)}
+                        className="gap-2"
                     >
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className="h-4 w-4" />
                         Edit
                     </Button>
                     <Button
                         variant="destructive"
                         onClick={() => setDeleteDialogOpen(true)}
+                        className="gap-2"
                     >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                         Delete
                     </Button>
                 </div>

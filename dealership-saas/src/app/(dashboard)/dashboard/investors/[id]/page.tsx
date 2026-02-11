@@ -152,17 +152,26 @@ export default function InvestorDetailPage({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4">
+        {/* Row 1: Back button */}
+        <div className="flex items-center">
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/investors")}
+            className="shrink-0"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
+        </div>
+
+        {/* Row 2: Avatar + name + subtitle + Edit button (single row on mobile) */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Avatar
+              className="h-16 w-16 shrink-0"
+              key={`${investor.id}-${investor.avatar_url ?? ""}`}
+            >
               <AvatarImage
                 src={getInvestorAvatarUrl(investor.avatar_url) ?? undefined}
                 alt={investor.name}
@@ -172,25 +181,27 @@ export default function InvestorDetailPage({
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {investor.name}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Investor details and transactions
               </p>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() =>
-              router.push(`/dashboard/investors/${investor.id}/edit`)
-            }
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                router.push(`/dashboard/investors/${investor.id}/edit`)
+              }
+              className="gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -339,7 +350,7 @@ export default function InvestorDetailPage({
       {/* Transactions */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Transactions</CardTitle>
               <CardDescription>
@@ -347,7 +358,7 @@ export default function InvestorDetailPage({
                 {transactions.length !== 1 ? "s" : ""}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
               <Button
                 variant="outline"
                 size="sm"

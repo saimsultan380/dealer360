@@ -170,169 +170,126 @@
   font-weight: 600;
 }
 
-/* Car Loader (moving car + smoke) */
-@keyframes car-loader-bob {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(6px, -4px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
+/* ── Dealer Loader (professional minimal) ────────────────────────── */
+
+/* Gentle float for the car icon */
+@keyframes dealer-loader-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
 }
 
-@keyframes car-loader-smoke {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.7);
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.45;
-  }
-  100% {
-    transform: translate3d(-14px, -14px, 0) scale(1.5);
-    opacity: 0;
-  }
+/* Continuous shimmer sweep across the progress bar */
+@keyframes dealer-loader-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
 }
 
-@keyframes car-loader-wheel {
-  to {
-    transform: rotate(360deg);
-  }
+/* Subtle pulse glow behind the icon */
+@keyframes dealer-loader-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(1.12); }
 }
 
-.car-loader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Spinning wheel dots */
+@keyframes dealer-loader-spin {
+  to { transform: rotate(360deg); }
 }
 
-.car-loader__label {
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
+/* Label fade-in */
+@keyframes dealer-loader-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.car-loader__track {
+/* Icon wrapper with glow ring */
+.dealer-loader__icon-wrap {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.9rem;
-  border-radius: 999px;
-  background-color: rgb(15 23 42 / 0.02);
-  box-shadow: 0 18px 45px rgb(15 23 42 / 0.12);
-  backdrop-filter: blur(10px);
 }
 
-.car-loader--sm .car-loader__track {
-  padding: 0.75rem;
-}
-
-.car-loader--md .car-loader__track {
-  padding: 0.9rem;
-}
-
-.car-loader--lg .car-loader__track {
-  padding: 1.1rem;
-}
-
-.car-loader__car {
+/* Glow ring behind the icon */
+.dealer-loader__icon-wrap::before {
+  content: "";
   position: absolute;
-  display: grid;
-  place-items: center;
-  animation: car-loader-bob 0.9s ease-in-out infinite;
+  inset: -8px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    var(--primary) 0%,
+    transparent 70%
+  );
+  opacity: 0.15;
+  animation: dealer-loader-pulse 2.4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/* The SVG icon */
+.dealer-loader__icon {
+  color: var(--primary);
+  animation: dealer-loader-float 2.4s ease-in-out infinite;
+  will-change: transform;
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.08));
+}
+
+/* Car body stroke draw */
+.dealer-loader__body {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: dealer-loader-draw 1.6s ease-out forwards;
+}
+
+@keyframes dealer-loader-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Wheel spin */
+.dealer-loader__wheel {
+  transform-origin: center;
+  animation: dealer-loader-spin 1.2s linear infinite;
+}
+
+/* Shimmer track */
+.dealer-loader__track {
+  position: relative;
+  height: 3px;
+  border-radius: 9999px;
+  background-color: var(--muted);
+  overflow: hidden;
+}
+
+/* The moving shimmer gradient */
+.dealer-loader__shimmer {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--primary) 50%,
+    transparent 100%
+  );
+  opacity: 0.7;
+  animation: dealer-loader-shimmer 1.8s ease-in-out infinite;
   will-change: transform;
 }
 
-.car-loader__icon {
-  width: 40px;
-  height: 40px;
-  color: var(--primary);
-  filter: drop-shadow(0 8px 18px rgb(15 23 42 / 0.18));
-}
-
-.car-loader--sm .car-loader__icon {
-  width: 36px;
-  height: 36px;
-}
-
-.car-loader--lg .car-loader__icon {
-  width: 46px;
-  height: 46px;
-}
-
-.car-loader__smoke {
-  position: absolute;
-  right: 22px;
-  bottom: 14px;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background-color: var(--muted-foreground);
-  filter: blur(0.6px);
-  opacity: 0;
-  animation: car-loader-smoke 1.15s ease-out infinite;
-  will-change: transform, opacity;
-}
-
-.car-loader__smoke--1 {
-  animation-delay: 0s;
-}
-
-.car-loader__smoke--2 {
-  width: 10px;
-  height: 10px;
-  bottom: 18px;
-  right: 26px;
-  animation-delay: 0.18s;
-}
-
-.car-loader__smoke--3 {
-  width: 8px;
-  height: 8px;
-  bottom: 10px;
-  right: 30px;
-  animation-delay: 0.34s;
-}
-
-.car-loader__wheels {
-  position: absolute;
-  left: 50%;
-  bottom: -4px;
-  transform: translateX(-50%);
-  width: 42px;
-  height: 12px;
-  pointer-events: none;
-}
-
-.car-loader__wheel {
-  position: absolute;
-  bottom: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: currentColor;
-  border: 2px solid var(--background);
-  animation: car-loader-wheel 0.45s linear infinite;
-  transform-origin: center;
-}
-
-.car-loader__wheel--left {
-  left: 2px;
-}
-
-.car-loader__wheel--right {
-  right: 2px;
+/* Label */
+.dealer-loader__label {
+  animation: dealer-loader-fadein 0.5s ease-out both;
+  animation-delay: 0.3s;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .car-loader__car,
-  .car-loader__smoke,
-  .car-loader__wheel {
-    animation-duration: 1ms !important;
+  .dealer-loader__icon,
+  .dealer-loader__icon-wrap::before,
+  .dealer-loader__shimmer,
+  .dealer-loader__wheel,
+  .dealer-loader__body,
+  .dealer-loader__label {
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
 }

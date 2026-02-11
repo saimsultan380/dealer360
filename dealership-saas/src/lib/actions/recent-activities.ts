@@ -14,13 +14,46 @@ export interface RecentActivity {
     link?: string;
 }
 
-export async function getRecentActivities(limit: number = 20): Promise<{ data: RecentActivity[] | null; error: string | null }> {
+export type DateFilter = 'today' | 'last_week' | 'last_month' | 'all';
+
+function getDateFilter(dateFilter: DateFilter): { startDate: Date | null; endDate: Date | null } {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    switch (dateFilter) {
+        case 'today':
+            return { startDate: startOfToday, endDate: now };
+        case 'last_week':
+            const weekAgo = new Date(startOfToday);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return { startDate: weekAgo, endDate: now };
+        case 'last_month':
+            const monthAgo = new Date(startOfToday);
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            return { startDate: monthAgo, endDate: now };
+        case 'all':
+        default:
+            return { startDate: null, endDate: null };
+    }
+}
+
+export async function getRecentActivities(
+    limit: number = 20,
+    page: number = 1,
+    dateFilter: DateFilter = 'all'
+): Promise<{ 
+    data: RecentActivity[] | null; 
+    error: string | null;
+    total: number;
+    page: number;
+    totalPages: number;
+}> {
     try {
         const supabase = (await createClient()) as any;
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            return { data: [], error: null };
+            return { data: [], error: null, total: 0, page: 1, totalPages: 0 };
         }
 
         const { data: profile } = await supabase
@@ -30,18 +63,31 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
             .single();
 
         if (!profile?.organization_id) {
-            return { data: [], error: null };
+            return { data: [], error: null, total: 0, page: 1, totalPages: 0 };
         }
 
+        const { startDate, endDate } = getDateFilter(dateFilter);
         const activities: RecentActivity[] = [];
 
+        // Helper function to build date filter query
+        const buildDateFilter = (query: any) => {
+            if (startDate && endDate) {
+                return query.gte('created_at', startDate.toISOString())
+                           .lte('created_at', endDate.toISOString());
+            }
+            return query;
+        };
+
         // Fetch recent vehicles
-        const { data: vehicles } = await supabase
+        let vehiclesQuery = supabase
             .from('vehicles')
-            .select('id, make, model, year, created_at, updated_at')
-            .eq('organization_id', profile.organization_id)
+            .select('id, make, model, year, created_at, updated_at', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        vehiclesQuery = buildDateFilter(vehiclesQuery);
+        const { data: vehicles } = await vehiclesQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10); // Fetch more to account for filtering
 
         (vehicles || []).forEach((vehicle: any) => {
             activities.push({
@@ -61,12 +107,15 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         });
 
         // Fetch recent sales
-        const { data: sales } = await supabase
+        let salesQuery = supabase
             .from('sales')
-            .select('id, customer_name, sale_price, created_at, updated_at')
-            .eq('organization_id', profile.organization_id)
+            .select('id, customer_name, sale_price, created_at, updated_at', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        salesQuery = buildDateFilter(salesQuery);
+        const { data: sales } = await salesQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10);
 
         (sales || []).forEach((sale: any) => {
             activities.push({
@@ -85,12 +134,15 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         });
 
         // Fetch recent investors
-        const { data: investors } = await supabase
+        let investorsQuery = supabase
             .from('investors')
-            .select('id, name, created_at, updated_at')
-            .eq('organization_id', profile.organization_id)
+            .select('id, name, created_at, updated_at', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        investorsQuery = buildDateFilter(investorsQuery);
+        const { data: investors } = await investorsQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10);
 
         (investors || []).forEach((investor: any) => {
             activities.push({
@@ -108,12 +160,15 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         });
 
         // Fetch recent cash flow transactions
-        const { data: cashTransactions } = await supabase
+        let cashTransactionsQuery = supabase
             .from('cash_transactions')
-            .select('id, transaction_type, amount, description, created_at, updated_at, status')
-            .eq('organization_id', profile.organization_id)
+            .select('id, transaction_type, amount, description, created_at, updated_at, status', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        cashTransactionsQuery = buildDateFilter(cashTransactionsQuery);
+        const { data: cashTransactions } = await cashTransactionsQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10);
 
         (cashTransactions || []).forEach((transaction: any) => {
             const isIncome = transaction.transaction_type === 'cash_in';
@@ -134,12 +189,15 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         });
 
         // Fetch recent clients
-        const { data: clients } = await supabase
+        let clientsQuery = supabase
             .from('clients')
-            .select('id, name, phone, created_at, updated_at')
-            .eq('organization_id', profile.organization_id)
+            .select('id, name, phone, created_at, updated_at', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        clientsQuery = buildDateFilter(clientsQuery);
+        const { data: clients } = await clientsQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10);
 
         (clients || []).forEach((client: any) => {
             activities.push({
@@ -158,12 +216,15 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         });
 
         // Fetch recent deals
-        const { data: deals } = await supabase
+        let dealsQuery = supabase
             .from('deals')
-            .select('id, customer_name, sale_price, status, created_at, updated_at')
-            .eq('organization_id', profile.organization_id)
+            .select('id, customer_name, sale_price, status, created_at, updated_at', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        dealsQuery = buildDateFilter(dealsQuery);
+        const { data: deals } = await dealsQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10);
 
         (deals || []).forEach((deal: any) => {
             activities.push({
@@ -183,12 +244,15 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         });
 
         // Fetch recent leads
-        const { data: leads } = await supabase
+        let leadsQuery = supabase
             .from('leads')
-            .select('id, customer_name, customer_phone, status, created_at, updated_at')
-            .eq('organization_id', profile.organization_id)
+            .select('id, customer_name, customer_phone, status, created_at, updated_at', { count: 'exact' })
+            .eq('organization_id', profile.organization_id);
+        
+        leadsQuery = buildDateFilter(leadsQuery);
+        const { data: leads } = await leadsQuery
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(limit * 10);
 
         (leads || []).forEach((lead: any) => {
             activities.push({
@@ -210,13 +274,28 @@ export async function getRecentActivities(limit: number = 20): Promise<{ data: R
         // Sort all activities by timestamp (most recent first)
         activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-        // Return only the most recent activities (limit)
-        return { data: activities.slice(0, limit), error: null };
+        // Calculate pagination
+        const total = activities.length;
+        const totalPages = Math.ceil(total / limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedActivities = activities.slice(startIndex, endIndex);
+
+        return { 
+            data: paginatedActivities, 
+            error: null,
+            total,
+            page,
+            totalPages,
+        };
     } catch (err) {
         console.error('Error in getRecentActivities:', err);
         return {
             data: null,
             error: err instanceof Error ? err.message : 'Failed to fetch recent activities.',
+            total: 0,
+            page: 1,
+            totalPages: 0,
         };
     }
 }

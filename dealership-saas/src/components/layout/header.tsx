@@ -16,6 +16,8 @@ import {
   Handshake,
   FileText,
   Wallet,
+  Search,
+  Command,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +39,7 @@ import { useSidebarStore, useAuthStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
 import { MobileSidebar } from "./mobile-sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { GlobalSearch } from "./global-search";
 // import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { getPendingDeals, PendingDeal } from "@/lib/actions/deals";
 import {
@@ -60,6 +63,7 @@ export function Header() {
   const [isMobile, setIsMobile] = useState(false);
   const [brandLogoError, setBrandLogoError] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Get module name from pathname
   const getModuleName = () => {
@@ -237,10 +241,35 @@ export function Header() {
         </div>
       </div>
 
+      {/* Global Search Modal */}
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+
       {/* Right Side - Menu, Notification, User */}
       <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
         {/* Language Switcher */}
         {/* <LanguageSwitcher /> */}
+
+        {/* Global Search Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSearchOpen(true)}
+          className="relative h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center sm:hidden"
+          aria-label="Search"
+        >
+          <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setSearchOpen(true)}
+          className="hidden sm:inline-flex items-center gap-2 h-9 px-3 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <Search className="h-4 w-4" />
+          <span className="hidden md:inline">Search...</span>
+          <kbd className="pointer-events-none hidden lg:inline-flex h-5 items-center gap-0.5 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-2">
+            <Command className="h-3 w-3" />K
+          </kbd>
+        </Button>
 
         {/* Theme Toggle */}
         <ThemeToggle />
