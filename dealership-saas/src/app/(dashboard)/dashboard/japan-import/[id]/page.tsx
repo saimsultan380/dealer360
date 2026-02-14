@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { getJapanImportCaseById } from '@/lib/actions/japan-import';
 import { JapanImportCaseTabs } from '@/components/japan-import/import-case-tabs';
+import { JapanImportStatusUpdater } from '@/components/japan-import/status-updater';
+import { PrintInvoiceButton } from '@/components/invoice/print-invoice-button';
 
 export default async function JapanImportCaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -51,6 +53,23 @@ export default async function JapanImportCaseDetailPage({ params }: { params: Pr
               {c.stock_code ? `Stock: ${c.stock_code}` : 'Stock: —'} • {c.chassis_number ? `Chassis: ${c.chassis_number}` : 'Chassis: —'}
             </p>
           </div>
+        </div>
+        <div className="flex flex-col gap-2 sm:items-end">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <PrintInvoiceButton
+              entityId={c.id}
+              type="japan_import"
+              variant="outline"
+              label="Print Invoice"
+              className="flex-1 sm:flex-none"
+            />
+            <Link href={`/dashboard/japan-import/${c.id}/edit`} className="flex-1 sm:flex-none">
+              <Button variant="outline" className="w-full sm:w-auto">
+                Edit Case
+              </Button>
+            </Link>
+          </div>
+          <JapanImportStatusUpdater caseId={c.id} status={c.status} />
         </div>
       </div>
 

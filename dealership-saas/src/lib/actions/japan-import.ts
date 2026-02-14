@@ -129,6 +129,32 @@ export async function createJapanImportCase(input: any): Promise<{ data: JapanIm
   }
 }
 
+export async function updateJapanImportCase(
+  id: string,
+  input: Partial<JapanImportCase>
+): Promise<{ data: JapanImportCase | null; error: string | null }> {
+  try {
+    const { supabase, organization_id } = await getOrgCtxOrThrow();
+    const { data, error } = await supabase
+      .from('japan_import_cases')
+      .update({
+        ...input,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', id)
+      .eq('organization_id', organization_id)
+      .select('*')
+      .single();
+    if (error) return { data: null, error: error.message };
+    revalidatePath('/dashboard/japan-import');
+    revalidatePath(`/dashboard/japan-import/${id}`);
+    revalidatePath(`/dashboard/japan-import/${id}/edit`);
+    return { data: data as JapanImportCase, error: null };
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err.message : 'Failed to update import case' };
+  }
+}
+
 export async function getJapanImportCaseById(id: string): Promise<{
   data:
     | {
@@ -196,7 +222,7 @@ export async function addJapanImportDocument(params: {
   };
 }): Promise<{ error: string | null }> {
   try {
-    const { supabase, organization_id, user_id } = await getOrgCtxOrThrow();
+    const { supabase, organization_id } = await getOrgCtxOrThrow();
     const { error } = await supabase.from('japan_import_documents').insert([
       {
         organization_id,
@@ -206,7 +232,6 @@ export async function addJapanImportDocument(params: {
         file_url: params.input.file_url,
         status: params.input.status ?? 'pending',
         notes: params.input.notes ?? null,
-        uploaded_by: user_id,
       },
     ] as any);
     if (error) return { error: error.message };

@@ -10,7 +10,8 @@ export type SearchCategory =
   | "investors"
   | "leads"
   | "cash_flow"
-  | "financing";
+  | "financing"
+  | "japan_import";
 
 export interface SearchResult {
   id: string;
@@ -278,6 +279,40 @@ export async function globalSearch(
                 : undefined,
               link: `/dashboard/financing/${f.id}`,
               icon: "landmark",
+            });
+          }
+        }
+      })()
+    );
+  }
+
+  // -- Japan Import --
+  if (category === "all" || category === "japan_import") {
+    searches.push(
+      (async () => {
+        const { data } = await supabase
+          .from("japan_import_cases")
+          .select(
+            "id, make, model, year, status, stock_code, chassis_number, estimated_total_cost_pkr"
+          )
+          .eq("organization_id", orgId)
+          .or(
+            `make.ilike.${ilike},model.ilike.${ilike},stock_code.ilike.${ilike},chassis_number.ilike.${ilike}`
+          )
+          .limit(limit) as { data: Record<string, unknown>[] | null };
+
+        if (data) {
+          for (const item of data) {
+            results.push({
+              id: String(item.id),
+              category: "japan_import",
+              title: `${item.year ? `${item.year} ` : ""}${item.make ?? ""} ${item.model ?? ""}`.trim(),
+              subtitle: `${String(item.status || "N/A").replace(/_/g, " ").toUpperCase()} ${item.stock_code ? `• Stock ${item.stock_code}` : ""} ${item.chassis_number ? `• ${item.chassis_number}` : ""}`,
+              meta: item.estimated_total_cost_pkr
+                ? `PKR ${Number(item.estimated_total_cost_pkr).toLocaleString()}`
+                : undefined,
+              link: `/dashboard/japan-import/${item.id}`,
+              icon: "globe",
             });
           }
         }

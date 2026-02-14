@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Search, MoreHorizontal, Building2, Car, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Building2, Car, AlertCircle, Loader2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getExchangeDeals } from '@/lib/actions/exchange-deals-complete';
+import { PrintInvoiceButton } from '@/components/invoice/print-invoice-button';
 
 const statusColors: Record<string, string> = {
     pending: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
@@ -150,6 +151,17 @@ export default function ExchangeDealsPage() {
                                                             Edit
                                                         </Link>
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="p-0">
+                                                        <PrintInvoiceButton
+                                                            entityId={deal.id}
+                                                            type="exchange"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            label="Print Invoice"
+                                                            className="w-full justify-start px-2 py-1.5 h-auto font-normal"
+                                                        />
+                                                    </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </div>
@@ -187,11 +199,21 @@ export default function ExchangeDealsPage() {
                                             </div>
                                         </div>
 
-                                        <Link href={`/dashboard/exchange-deals/${deal.id}`} className="block">
-                                            <Button variant="outline" className="w-full" size="sm">
-                                                View Deal
-                                            </Button>
-                                        </Link>
+                                        <div className="flex gap-2">
+                                            <Link href={`/dashboard/exchange-deals/${deal.id}`} className="flex-1">
+                                                <Button variant="outline" className="w-full" size="sm">
+                                                    View Deal
+                                                </Button>
+                                            </Link>
+                                            <PrintInvoiceButton
+                                                entityId={deal.id}
+                                                type="exchange"
+                                                variant="outline"
+                                                size="sm"
+                                                className="gap-1.5"
+                                                label="Invoice"
+                                            />
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}

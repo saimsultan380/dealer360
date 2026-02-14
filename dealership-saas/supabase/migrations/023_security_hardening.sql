@@ -2,7 +2,7 @@
 -- MIGRATION 023: Security Hardening
 -- =============================================================================
 -- Fixes all Supabase Advisor security issues:
--- 1. SECURITY DEFINER views → SECURITY INVOKER (3 views)
+-- 1. SECURITY DEFINER views → SECURITY INVOKER (3 views) 
 -- 2. Function search_path mutable → SET search_path = '' (20 functions)
 -- 3. Overly permissive RLS policies → Restricted to service_role (3 policies)
 -- 4. Extension in public → Moved to extensions schema

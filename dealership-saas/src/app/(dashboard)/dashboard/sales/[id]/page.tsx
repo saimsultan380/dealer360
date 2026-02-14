@@ -34,6 +34,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getSaleById } from "@/lib/actions/sales";
 import { BuyerContactActions } from "@/components/sales/buyer-contact-actions";
 import { VehicleImageCarousel } from "@/components/inventory/vehicle-image-carousel";
+import { PrintInvoiceButton } from "@/components/invoice/print-invoice-button";
 import { getClientAvatarUrl } from "@/lib/utils/avatar-url";
 import { cn } from "@/lib/utils";
 
@@ -123,10 +124,14 @@ export default async function SaleDetailPage({
           </div>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-            <Printer className="mr-2 h-4 w-4" />
-            Print
-          </Button>
+          <PrintInvoiceButton
+            entityId={sale.id}
+            type="sale"
+            variant="outline"
+            size="sm"
+            label="Print Invoice"
+            className="flex-1 sm:flex-none"
+          />
           <Link
             href={`/dashboard/sales/${sale.id}/edit`}
             className="flex-1 sm:flex-none"

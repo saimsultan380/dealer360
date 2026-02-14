@@ -12,6 +12,7 @@ import {
   Building2,
   Wallet,
   Landmark,
+  Globe,
   ArrowRight,
   Loader2,
   Command,
@@ -35,6 +36,7 @@ const CATEGORIES: { value: SearchCategory; label: string; icon: React.ReactNode 
   { value: "leads", label: "Leads", icon: <Users className="h-3.5 w-3.5" /> },
   { value: "cash_flow", label: "Cash Flow", icon: <Wallet className="h-3.5 w-3.5" /> },
   { value: "financing", label: "Financing", icon: <Landmark className="h-3.5 w-3.5" /> },
+  { value: "japan_import", label: "Japan Import", icon: <Globe className="h-3.5 w-3.5" /> },
 ];
 
 function getCategoryIcon(icon: string, className?: string) {
@@ -47,6 +49,7 @@ function getCategoryIcon(icon: string, className?: string) {
     case "building": return <Building2 className={cls} />;
     case "wallet": return <Wallet className={cls} />;
     case "landmark": return <Landmark className={cls} />;
+    case "globe": return <Globe className={cls} />;
     default: return <Search className={cls} />;
   }
 }
@@ -60,6 +63,7 @@ function getCategoryColor(category: SearchCategory) {
     case "leads": return "text-orange-500 bg-orange-500/10";
     case "cash_flow": return "text-indigo-500 bg-indigo-500/10";
     case "financing": return "text-purple-500 bg-purple-500/10";
+    case "japan_import": return "text-sky-500 bg-sky-500/10";
     default: return "text-muted-foreground bg-muted";
   }
 }
@@ -73,6 +77,7 @@ function getCategoryLabel(category: SearchCategory) {
     case "leads": return "Lead";
     case "cash_flow": return "Cash Flow";
     case "financing": return "Financing";
+    case "japan_import": return "Japan Import";
     default: return category;
   }
 }

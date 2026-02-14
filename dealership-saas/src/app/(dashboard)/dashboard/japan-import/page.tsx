@@ -22,6 +22,13 @@ export default async function JapanImportPage({
     page,
     limit,
   });
+  const readyForSaleCount = data.filter((c) => c.status === 'ready_for_sale').length;
+  const inTransitCount = data.filter((c) => c.status === 'in_transit').length;
+  const customsCount = data.filter((c) => c.status === 'customs').length;
+  const totalEstimatedPkr = data.reduce(
+    (acc, c) => acc + (Number(c.estimated_total_cost_pkr || 0) || 0),
+    0
+  );
 
   return (
     <div className="space-y-6">
@@ -71,6 +78,27 @@ export default async function JapanImportPage({
               </Button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-xs text-muted-foreground">Cases in transit</div>
+          <div className="mt-1 text-2xl font-semibold">{inTransitCount}</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-xs text-muted-foreground">Under customs</div>
+          <div className="mt-1 text-2xl font-semibold">{customsCount}</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-xs text-muted-foreground">Ready for sale</div>
+          <div className="mt-1 text-2xl font-semibold">{readyForSaleCount}</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-xs text-muted-foreground">Estimated total cost (PKR)</div>
+          <div className="mt-1 text-2xl font-semibold">
+            PKR {Math.round(totalEstimatedPkr).toLocaleString()}
+          </div>
         </div>
       </div>
 

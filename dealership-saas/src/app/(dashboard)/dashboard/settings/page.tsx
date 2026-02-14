@@ -18,6 +18,7 @@ import {
   Palette,
   Users,
   SlidersHorizontal,
+  FileText,
 } from "lucide-react";
 import { ProfileSettings } from "@/components/settings/profile-settings";
 import { PasswordSettings } from "@/components/settings/password-settings";
@@ -26,6 +27,7 @@ import { NotificationSettings } from "@/components/settings/notification-setting
 import { AppearanceSettings } from "@/components/settings/appearance-settings";
 import { StaffSettings } from "@/components/settings/staff-settings";
 import { DealershipModulesSettings } from "@/components/settings/dealership-modules-settings";
+import { InvoiceSlipSettings } from "@/components/settings/invoice-settings";
 import { useAuthStore } from "@/lib/store";
 
 export default function SettingsPage() {
@@ -71,7 +73,7 @@ export default function SettingsPage() {
       {/* Settings Tabs */}
       <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
         <div className="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
-          <TabsList className="inline-flex w-full min-w-max sm:grid sm:grid-cols-2 md:grid-cols-7 h-auto p-1 gap-1">
+          <TabsList className="inline-flex w-full min-w-max sm:grid sm:grid-cols-2 md:grid-cols-8 h-auto p-1 gap-1">
             <TabsTrigger
               value="profile"
               className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm flex-1 sm:flex-none"
@@ -126,6 +128,16 @@ export default function SettingsPage() {
               >
                 <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>Staff</span>
+              </TabsTrigger>
+            )}
+            {showModulesTab && (
+              <TabsTrigger
+                value="invoice"
+                className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm flex-1 sm:flex-none"
+              >
+                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span className="hidden xs:inline">Invoice Slip</span>
+                <span className="xs:hidden">Invoice</span>
               </TabsTrigger>
             )}
           </TabsList>
@@ -231,6 +243,12 @@ export default function SettingsPage() {
                 <StaffSettings />
               </CardContent>
             </Card>
+          </TabsContent>
+        )}
+
+        {showModulesTab && (
+          <TabsContent value="invoice" className="space-y-6">
+            <InvoiceSlipSettings />
           </TabsContent>
         )}
       </Tabs>

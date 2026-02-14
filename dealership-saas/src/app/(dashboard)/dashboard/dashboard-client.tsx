@@ -24,6 +24,15 @@ import {
   FileText,
   ShieldAlert,
   X,
+  ShoppingCart,
+  Repeat2,
+  CreditCard,
+  Globe,
+  BookOpen,
+  BookText,
+  Wallet,
+  ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
 import { RevenueChart, DealStatusChart } from "@/components/charts";
 import { RecentActivities } from "@/components/dashboard/recent-activities";
@@ -37,8 +46,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { getDashboardMetrics } from "@/lib/actions/dashboard";
+import { filterNavByRole } from "@/lib/auth/permissions";
+import {
+  filterNavByStaffModules,
+  type StaffModuleKey,
+} from "@/lib/auth/module-access";
 import {
   subscribeToDeals,
   subscribeToLeads,
@@ -82,6 +104,32 @@ function MiniSparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
+type ModuleKey =
+  | "dashboard"
+  | "today_book"
+  | "inventory"
+  | "sales"
+  | "exchange_deals"
+  | "financing"
+  | "japan_import"
+  | "leads"
+  | "deals"
+  | "investors"
+  | "clients"
+  | "cash_flow"
+  | "ledger"
+  | "documents"
+  | "settings";
+
+type QuickActionItem = {
+  name: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
+  moduleKey: ModuleKey;
+  accentClass: string;
+};
+
 export default function DashboardClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -94,6 +142,7 @@ export default function DashboardClient() {
   const [metricsError, setMetricsError] = useState<string | null>(null);
   const [metrics, setMetrics] =
     useState<Awaited<ReturnType<typeof getDashboardMetrics>>["data"]>(null);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   const DEFAULT_VISIBLE_STAT_IDS = useMemo(
     () => [
@@ -310,6 +359,243 @@ export default function DashboardClient() {
     [stats, visibleStatIds]
   );
 
+  const createActions = useMemo(
+    () => [
+      {
+        name: t("dashboard.addVehicle"),
+        description: "Add a new vehicle and publish inventory details",
+        href: "/dashboard/inventory/new",
+        icon: Car,
+        accentClass:
+          "bg-violet-500/10 text-violet-700 dark:text-violet-300 ring-violet-500/30",
+      },
+      {
+        name: t("dashboard.createLead"),
+        description: "Capture a new lead and assign follow-up",
+        href: "/dashboard/leads/new",
+        icon: Users,
+        accentClass:
+          "bg-orange-500/10 text-orange-700 dark:text-orange-300 ring-orange-500/30",
+      },
+      {
+        name: t("dashboard.recordDeal"),
+        description: "Create a deal record and track pending payments",
+        href: "/dashboard/deals/new",
+        icon: HandshakeIcon,
+        accentClass:
+          "bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-blue-500/30",
+      },
+      {
+        name: "Record Sale",
+        description: "Complete a sale with vehicle and customer details",
+        href: "/dashboard/sales/new",
+        icon: ShoppingCart,
+        accentClass:
+          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30",
+      },
+      {
+        name: t("dashboard.uploadDocuments"),
+        description: "Open documents module to upload and manage files",
+        href: "/dashboard/documents",
+        icon: FileText,
+        accentClass:
+          "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 ring-cyan-500/30",
+      },
+    ],
+    [t]
+  );
+
+  const moduleActions = useMemo<QuickActionItem[]>(
+    () => [
+      {
+        name: "Today Book",
+        description: "See today's activity and cash snapshot",
+        href: "/dashboard/today-book",
+        icon: BookOpen,
+        moduleKey: "today_book",
+        accentClass:
+          "bg-slate-500/10 text-slate-700 dark:text-slate-300 ring-slate-500/30",
+      },
+      {
+        name: "Inventory",
+        description: "Browse and manage all vehicles",
+        href: "/dashboard/inventory",
+        icon: Car,
+        moduleKey: "inventory",
+        accentClass:
+          "bg-violet-500/10 text-violet-700 dark:text-violet-300 ring-violet-500/30",
+      },
+      {
+        name: "Sales",
+        description: "Track sold units and sale progress",
+        href: "/dashboard/sales",
+        icon: ShoppingCart,
+        moduleKey: "sales",
+        accentClass:
+          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30",
+      },
+      {
+        name: "Exchange",
+        description: "Manage customer vehicle exchange deals",
+        href: "/dashboard/exchange-deals",
+        icon: Repeat2,
+        moduleKey: "exchange_deals",
+        accentClass:
+          "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 ring-indigo-500/30",
+      },
+      {
+        name: "Financing",
+        description: "Handle financing applications and EMI",
+        href: "/dashboard/financing",
+        icon: CreditCard,
+        moduleKey: "financing",
+        accentClass:
+          "bg-purple-500/10 text-purple-700 dark:text-purple-300 ring-purple-500/30",
+      },
+      {
+        name: "Japan Import",
+        description: "Manage import cases and shipment flow",
+        href: "/dashboard/japan-import",
+        icon: Globe,
+        moduleKey: "japan_import",
+        accentClass:
+          "bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-sky-500/30",
+      },
+      {
+        name: "Leads",
+        description: "Follow up leads and conversion pipeline",
+        href: "/dashboard/leads",
+        icon: Users,
+        moduleKey: "leads",
+        accentClass:
+          "bg-orange-500/10 text-orange-700 dark:text-orange-300 ring-orange-500/30",
+      },
+      {
+        name: "Pending Deals",
+        description: "Track due payments and overdue deals",
+        href: "/dashboard/deals/pending",
+        icon: HandshakeIcon,
+        moduleKey: "deals",
+        accentClass:
+          "bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-blue-500/30",
+      },
+      {
+        name: "Investors",
+        description: "View investors and profit participation",
+        href: "/dashboard/investors",
+        icon: TrendingUp,
+        moduleKey: "investors",
+        accentClass:
+          "bg-teal-500/10 text-teal-700 dark:text-teal-300 ring-teal-500/30",
+      },
+      {
+        name: "Clients",
+        description: "Access customer records and interactions",
+        href: "/dashboard/clients",
+        icon: CircleUser,
+        moduleKey: "clients",
+        accentClass:
+          "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 ring-cyan-500/30",
+      },
+      {
+        name: "Cash Flow",
+        description: "Review income, expenses, and categories",
+        href: "/dashboard/cash-flow",
+        icon: Wallet,
+        moduleKey: "cash_flow",
+        accentClass:
+          "bg-lime-500/10 text-lime-700 dark:text-lime-300 ring-lime-500/30",
+      },
+      {
+        name: "Ledger",
+        description: "Open ledger entries and balances",
+        href: "/dashboard/ledger",
+        icon: BookText,
+        moduleKey: "ledger",
+        accentClass:
+          "bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-500/30",
+      },
+      {
+        name: "Documents",
+        description: "Store and retrieve dealership paperwork",
+        href: "/dashboard/documents",
+        icon: FileText,
+        moduleKey: "documents",
+        accentClass:
+          "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 ring-cyan-500/30",
+      },
+      {
+        name: "Settings",
+        description: "Configure users, modules, and preferences",
+        href: "/dashboard/settings",
+        icon: Zap,
+        moduleKey: "settings",
+        accentClass:
+          "bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-rose-500/30",
+      },
+    ],
+    []
+  );
+
+  const visibleModuleActions = useMemo(() => {
+    const featureFlags = organization?.feature_flags as unknown as Record<string, unknown>;
+    const role = profile?.role;
+    const fallbackTrue = (value: unknown) =>
+      value === undefined ? true : Boolean(value);
+
+    const isEnabled = (moduleKey: ModuleKey): boolean => {
+      if (
+        moduleKey === "dashboard" ||
+        moduleKey === "today_book" ||
+        moduleKey === "settings"
+      )
+        return true;
+
+      switch (moduleKey) {
+        case "inventory":
+          return fallbackTrue(featureFlags?.enable_inventory);
+        case "sales":
+          return fallbackTrue(featureFlags?.enable_sales);
+        case "exchange_deals":
+          return fallbackTrue(featureFlags?.enable_exchange_deals);
+        case "financing":
+          return fallbackTrue(featureFlags?.enable_financing);
+        case "leads":
+          return fallbackTrue(featureFlags?.enable_leads);
+        case "deals":
+          return fallbackTrue(featureFlags?.enable_deals);
+        case "documents":
+          return fallbackTrue(featureFlags?.enable_documents);
+        case "cash_flow":
+          return fallbackTrue(featureFlags?.enable_cash_flow);
+        case "ledger":
+          return fallbackTrue(featureFlags?.enable_ledger);
+        case "clients":
+          return fallbackTrue(featureFlags?.enable_clients);
+        case "investors":
+          return fallbackTrue(featureFlags?.enable_investors);
+        case "japan_import":
+          return Boolean(featureFlags?.enable_japan_import);
+        default:
+          return true;
+      }
+    };
+
+    const enabled = moduleActions.filter((item) => isEnabled(item.moduleKey));
+    const staffOverride = (organization?.settings as any)?.staff_module_access?.[
+      profile?.id ?? ""
+    ] as StaffModuleKey[] | undefined;
+    const staffFiltered =
+      Array.isArray(staffOverride) && staffOverride.length
+        ? filterNavByStaffModules({
+            modules: staffOverride,
+            items: enabled,
+          })
+        : enabled;
+
+    return role ? filterNavByRole({ role, items: staffFiltered }) : staffFiltered;
+  }, [moduleActions, organization?.feature_flags, organization?.settings, profile]);
+
   return (
     <div
       className="space-y-8 pb-8"
@@ -424,54 +710,113 @@ export default function DashboardClient() {
               <ChevronDown className="h-4 w-4" />
             )}
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Sheet open={quickActionsOpen} onOpenChange={setQuickActionsOpen}>
+            <SheetTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Zap className="h-4 w-4" />
                 Quick Actions
                 <ChevronDown className="h-4 w-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard/inventory/new")}
-              >
-                <Car className="mr-2 h-4 w-4" />
-                {t("dashboard.addVehicle")}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {t("common.inventory")}
-                </span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard/leads/new")}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                {t("dashboard.createLead")}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {t("common.leads")}
-                </span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard/deals/new")}
-              >
-                <HandshakeIcon className="mr-2 h-4 w-4" />
-                {t("dashboard.recordDeal")}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {t("common.pendingDeals")}
-                </span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard/documents")}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                {t("dashboard.uploadDocuments")}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {t("common.documents")}
-                </span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-2xl p-0 overflow-y-auto"
+            >
+              <div className="p-4 sm:p-6 space-y-6">
+                <SheetHeader className="space-y-2 text-left">
+                  <SheetTitle className="text-xl sm:text-2xl">
+                    Dealer Quick Actions
+                  </SheetTitle>
+                  <SheetDescription>
+                    Open any major area in one click. Designed for fast navigation
+                    on desktop and mobile.
+                  </SheetDescription>
+                </SheetHeader>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Create Fast
+                  </h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {createActions.map((item) => (
+                      <button
+                        key={item.href}
+                        onClick={() => {
+                          setQuickActionsOpen(false);
+                          router.push(item.href);
+                        }}
+                        className={cn(
+                          "w-full rounded-xl border p-4 text-left transition-all hover:shadow-md hover:-translate-y-0.5",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={cn(
+                              "mt-0.5 h-10 w-10 shrink-0 rounded-lg ring-1 flex items-center justify-center",
+                              item.accentClass
+                            )}
+                          >
+                            <item.icon className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm sm:text-base">
+                              {item.name}
+                            </p>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                              {item.description}
+                            </p>
+                          </div>
+                          <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Navigate Modules
+                  </h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {visibleModuleActions.map((item) => (
+                      <button
+                        key={item.href}
+                        onClick={() => {
+                          setQuickActionsOpen(false);
+                          router.push(item.href);
+                        }}
+                        className={cn(
+                          "w-full rounded-xl border p-4 text-left transition-all hover:shadow-md hover:-translate-y-0.5",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={cn(
+                              "mt-0.5 h-10 w-10 shrink-0 rounded-lg ring-1 flex items-center justify-center",
+                              item.accentClass
+                            )}
+                          >
+                            <item.icon className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm sm:text-base">
+                              {item.name}
+                            </p>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                              {item.description}
+                            </p>
+                          </div>
+                          <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 

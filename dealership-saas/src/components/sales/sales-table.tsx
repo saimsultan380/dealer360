@@ -16,6 +16,7 @@ import {
   Pencil,
   TrendingUp,
   AlertCircle,
+  Printer,
 } from "lucide-react";
 import {
   Table,
@@ -43,6 +44,7 @@ import { subscribeToSales } from "@/lib/supabase/realtime";
 import { useAuthStore } from "@/lib/store";
 import { getClientAvatarUrl } from "@/lib/utils/avatar-url";
 import { cn } from "@/lib/utils";
+import { PrintInvoiceButton } from "@/components/invoice/print-invoice-button";
 
 interface SalesTableProps {
   sales: any[];
@@ -381,6 +383,20 @@ export function SalesTable({
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Sale
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            className="p-0"
+                          >
+                            <PrintInvoiceButton
+                              entityId={sale.id}
+                              type="sale"
+                              variant="ghost"
+                              size="sm"
+                              label="Print Invoice"
+                              className="w-full justify-start px-2 py-1.5 h-auto font-normal"
+                            />
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

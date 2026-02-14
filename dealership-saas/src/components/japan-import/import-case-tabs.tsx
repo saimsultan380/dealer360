@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FileText, Ship, ShieldCheck, ClipboardCheck, Plus, Loader2, Gavel, Calculator, ArrowRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/lib/store';
 import { calculateImportCosting } from '@/lib/utils/japan-import-costing';
 import type {
   JapanImportAuction,
@@ -60,7 +62,15 @@ export function JapanImportCaseTabs(props: {
   auction: JapanImportAuction | null;
   costing: JapanImportCosting | null;
 }) {
+  const router = useRouter();
+  const { organization } = useAuthStore();
   const [busy, setBusy] = useState(false);
+  const featureFlags = organization?.feature_flags;
+  const importDocumentsEnabled = featureFlags?.enable_import_documents ?? true;
+  const importShipmentsEnabled = featureFlags?.enable_import_shipments ?? true;
+  const importCustomsEnabled = featureFlags?.enable_import_customs ?? true;
+  const importInspectionsEnabled = featureFlags?.enable_import_inspections ?? true;
+
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -164,12 +174,12 @@ export function JapanImportCaseTabs(props: {
     const supabase = createClient();
     const fileExt = file.name.split('.').pop();
     const fileName = `grade-sheet-${Date.now()}.${fileExt}`;
-    const filePath = `japan-import/${props.importCaseId}/${fileName}`;
+    const filePath = `${organization?.id ?? 'unknown-org'}/japan-import/${props.importCaseId}/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage.from('vehicles').upload(filePath, file, { upsert: true });
+    const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file, { upsert: true });
     if (uploadError) throw new Error(uploadError.message);
 
-    const { data } = supabase.storage.from('vehicles').getPublicUrl(filePath);
+    const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
     return data.publicUrl;
   };
 
@@ -296,6 +306,18 @@ export function JapanImportCaseTabs(props: {
   };
 
   const docCount = useMemo(() => props.documents.length, [props.documents.length]);
+  const defaultTab = useMemo(() => {
+    if (importDocumentsEnabled) return 'documents';
+    if (importShipmentsEnabled) return 'shipment';
+    if (importCustomsEnabled) return 'customs';
+    if (importInspectionsEnabled) return 'inspection';
+    return 'auction';
+  }, [
+    importCustomsEnabled,
+    importDocumentsEnabled,
+    importInspectionsEnabled,
+    importShipmentsEnabled,
+  ]);
 
   const computed = useMemo(() => {
     const rate = Number(costing.jpy_to_pkr_rate || 0);
@@ -331,7 +353,7 @@ export function JapanImportCaseTabs(props: {
         </div>
       )}
 
-      <Tabs defaultValue="documents" className="space-y-4">
+      <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="auction" className="gap-2">
             <Gavel className="h-4 w-4" />
@@ -341,22 +363,30 @@ export function JapanImportCaseTabs(props: {
             <Calculator className="h-4 w-4" />
             Costing
           </TabsTrigger>
-          <TabsTrigger value="documents" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Documents ({docCount})
-          </TabsTrigger>
-          <TabsTrigger value="shipment" className="gap-2">
-            <Ship className="h-4 w-4" />
-            Shipment
-          </TabsTrigger>
-          <TabsTrigger value="customs" className="gap-2">
-            <ShieldCheck className="h-4 w-4" />
-            Customs
-          </TabsTrigger>
-          <TabsTrigger value="inspection" className="gap-2">
-            <ClipboardCheck className="h-4 w-4" />
-            Inspection
-          </TabsTrigger>
+          {importDocumentsEnabled && (
+            <TabsTrigger value="documents" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Documents ({docCount})
+            </TabsTrigger>
+          )}
+          {importShipmentsEnabled && (
+            <TabsTrigger value="shipment" className="gap-2">
+              <Ship className="h-4 w-4" />
+              Shipment
+            </TabsTrigger>
+          )}
+          {importCustomsEnabled && (
+            <TabsTrigger value="customs" className="gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              Customs
+            </TabsTrigger>
+          )}
+          {importInspectionsEnabled && (
+            <TabsTrigger value="inspection" className="gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Inspection
+            </TabsTrigger>
+          )}
           <TabsTrigger value="inventory" className="gap-2">
             <ArrowRight className="h-4 w-4" />
             Inventory
@@ -544,7 +574,8 @@ export function JapanImportCaseTabs(props: {
           </Card>
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-4">
+        {importDocumentsEnabled && (
+          <TabsContent value="documents" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Add document</CardTitle>
@@ -621,9 +652,11 @@ export function JapanImportCaseTabs(props: {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
+        )}
 
-        <TabsContent value="shipment" className="space-y-4">
+        {importShipmentsEnabled && (
+          <TabsContent value="shipment" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Shipment</CardTitle>
@@ -671,9 +704,11 @@ export function JapanImportCaseTabs(props: {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
+        )}
 
-        <TabsContent value="customs" className="space-y-4">
+        {importCustomsEnabled && (
+          <TabsContent value="customs" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Customs & Clearance</CardTitle>
@@ -723,9 +758,11 @@ export function JapanImportCaseTabs(props: {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
+        )}
 
-        <TabsContent value="inspection" className="space-y-4">
+        {importInspectionsEnabled && (
+          <TabsContent value="inspection" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Inspection</CardTitle>
@@ -773,7 +810,8 @@ export function JapanImportCaseTabs(props: {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
+        )}
 
         <TabsContent value="inventory" className="space-y-4">
           <Card>
@@ -788,6 +826,19 @@ export function JapanImportCaseTabs(props: {
                 <div><span className="text-muted-foreground">Status:</span> <span className="font-medium">{props.importStatus}</span></div>
                 <div><span className="text-muted-foreground">Linked vehicle:</span> <span className="font-medium">{props.linkedVehicleId ?? 'Not created yet'}</span></div>
               </div>
+              {props.linkedVehicleId && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={() =>
+                      router.push(`/dashboard/inventory/${props.linkedVehicleId}`)
+                    }
+                  >
+                    View linked inventory vehicle
+                  </Button>
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
                 <Button
                   onClick={createInventory}

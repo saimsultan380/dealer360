@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/ui/pagination-advanced';
 import { cn } from '@/lib/utils';
 import type { JapanImportCase, JapanImportStatus } from '@/lib/types/database';
+import { PrintInvoiceButton } from '@/components/invoice/print-invoice-button';
 
 const statusStyle: Record<JapanImportStatus, string> = {
   planned: 'bg-muted text-foreground',
@@ -78,9 +79,17 @@ export function JapanImportCasesTable(props: {
                       {c.eta_date ? new Date(c.eta_date).toLocaleDateString('en-PK') : '—'}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/japan-import/${c.id}`}>
-                        <Button variant="outline" size="sm">View</Button>
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <PrintInvoiceButton
+                          entityId={c.id}
+                          type="japan_import"
+                          variant="outline"
+                          size="sm"
+                        />
+                        <Link href={`/dashboard/japan-import/${c.id}`}>
+                          <Button variant="outline" size="sm">View</Button>
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -95,24 +104,29 @@ export function JapanImportCasesTable(props: {
             <div className="p-8 text-center text-sm text-muted-foreground">No import cases found.</div>
           ) : (
             props.cases.map((c) => (
-              <Link key={c.id} href={`/dashboard/japan-import/${c.id}`} className="block p-4 hover:bg-muted/40">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">
-                      {(c.year ?? '—')} {c.make} {c.model}
+              <div key={c.id} className="p-4 hover:bg-muted/40">
+                <Link href={`/dashboard/japan-import/${c.id}`} className="block">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">
+                        {(c.year ?? '—')} {c.make} {c.model}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {c.stock_code ? `Stock: ${c.stock_code}` : 'Stock: —'} • {c.chassis_number ? `Chassis: ${c.chassis_number}` : 'Chassis: —'}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {c.stock_code ? `Stock: ${c.stock_code}` : 'Stock: —'} • {c.chassis_number ? `Chassis: ${c.chassis_number}` : 'Chassis: —'}
-                    </div>
+                    <Badge variant="outline" className={cn('capitalize shrink-0', statusStyle[c.status])}>
+                      {c.status.replace(/_/g, ' ')}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className={cn('capitalize shrink-0', statusStyle[c.status])}>
-                    {c.status.replace(/_/g, ' ')}
-                  </Badge>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    ETA: {c.eta_date ? new Date(c.eta_date).toLocaleDateString('en-PK') : '—'}
+                  </div>
+                </Link>
+                <div className="mt-2 flex justify-end">
+                  <PrintInvoiceButton entityId={c.id} type="japan_import" variant="outline" size="sm" label="Invoice" />
                 </div>
-                <div className="mt-2 text-xs text-muted-foreground">
-                  ETA: {c.eta_date ? new Date(c.eta_date).toLocaleDateString('en-PK') : '—'}
-                </div>
-              </Link>
+              </div>
             ))
           )}
         </div>

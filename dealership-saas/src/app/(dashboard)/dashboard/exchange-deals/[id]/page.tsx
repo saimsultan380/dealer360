@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Car, User, DollarSign, Calendar, FileText, Image as ImageIcon, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Loader2, Car, User, DollarSign, Calendar, FileText, Image as ImageIcon, Phone, Mail, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PrintInvoiceButton } from '@/components/invoice/print-invoice-button';
 
 const statusColors: Record<string, string> = {
     pending: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
@@ -257,6 +258,12 @@ export default function ExchangeDealDetailPage({ params }: { params: { id: strin
                 <Button variant="outline" onClick={() => router.push('/dashboard/exchange-deals')}>
                     Back to Deals
                 </Button>
+                <PrintInvoiceButton
+                    entityId={params.id}
+                    type="exchange"
+                    variant="outline"
+                    label="Print Invoice"
+                />
                 <Button onClick={() => router.push(`/dashboard/exchange-deals/${params.id}/edit`)}>
                     Edit Deal
                 </Button>
