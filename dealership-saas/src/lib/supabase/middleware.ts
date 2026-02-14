@@ -27,8 +27,6 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  // NOTE: Supabase generated types are not fully wired up yet in this repo.
-  // Cast to avoid blocking builds with `never` inference for select strings.
   const supabase = createServerClient<Database, "public">(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -50,7 +48,7 @@ export async function updateSession(request: NextRequest) {
         },
       },
     }
-  ) as any;
+  );
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
@@ -177,7 +175,9 @@ export async function updateSession(request: NextRequest) {
           .select("maintenance_mode")
           .eq("id", 1)
           .maybeSingle();
-        const maintenanceMode = (data as any)?.maintenance_mode === true;
+        const maintenanceMode =
+          ((data as { maintenance_mode?: boolean } | null)?.maintenance_mode ??
+            false) === true;
         if (maintenanceMode && !pathname.startsWith("/maintenance")) {
           const url = request.nextUrl.clone();
           url.pathname = "/maintenance";
