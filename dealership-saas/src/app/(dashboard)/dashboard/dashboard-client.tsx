@@ -66,6 +66,7 @@ import {
   subscribeToLeads,
   subscribeToVehicles,
 } from "@/lib/supabase/realtime";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 function MiniSparkline({ data, color }: { data: number[]; color: string }) {
   if (!data || data.length === 0) return null;
@@ -538,10 +539,8 @@ export default function DashboardClient() {
   );
 
   const visibleModuleActions = useMemo(() => {
-    const featureFlags = organization?.feature_flags as unknown as Record<string, unknown>;
+    const featureFlags = organization?.feature_flags;
     const role = profile?.role;
-    const fallbackTrue = (value: unknown) =>
-      value === undefined ? true : Boolean(value);
 
     const isEnabled = (moduleKey: ModuleKey): boolean => {
       if (
@@ -553,38 +552,46 @@ export default function DashboardClient() {
 
       switch (moduleKey) {
         case "inventory":
-          return fallbackTrue(featureFlags?.enable_inventory);
+          return isFeatureEnabled(featureFlags, "enable_inventory");
         case "sales":
-          return fallbackTrue(featureFlags?.enable_sales);
+          return isFeatureEnabled(featureFlags, "enable_sales");
         case "exchange_deals":
-          return fallbackTrue(featureFlags?.enable_exchange_deals);
+          return isFeatureEnabled(featureFlags, "enable_exchange_deals");
         case "financing":
-          return fallbackTrue(featureFlags?.enable_financing);
+          return isFeatureEnabled(featureFlags, "enable_financing");
         case "leads":
-          return fallbackTrue(featureFlags?.enable_leads);
+          return isFeatureEnabled(featureFlags, "enable_leads");
         case "deals":
-          return fallbackTrue(featureFlags?.enable_deals);
+          return isFeatureEnabled(featureFlags, "enable_deals");
         case "documents":
-          return fallbackTrue(featureFlags?.enable_documents);
+          return isFeatureEnabled(featureFlags, "enable_documents");
         case "cash_flow":
-          return fallbackTrue(featureFlags?.enable_cash_flow);
+          return isFeatureEnabled(featureFlags, "enable_cash_flow");
         case "ledger":
-          return fallbackTrue(featureFlags?.enable_ledger);
+          return isFeatureEnabled(featureFlags, "enable_ledger");
         case "clients":
-          return fallbackTrue(featureFlags?.enable_clients);
+          return isFeatureEnabled(featureFlags, "enable_clients");
         case "investors":
-          return fallbackTrue(featureFlags?.enable_investors);
+          return isFeatureEnabled(featureFlags, "enable_investors");
         case "japan_import":
-          return Boolean(featureFlags?.enable_japan_import);
+          return isFeatureEnabled(featureFlags, "enable_japan_import", false);
         default:
           return true;
       }
     };
 
     const enabled = moduleActions.filter((item) => isEnabled(item.moduleKey));
-    const staffOverride = (organization?.settings as any)?.staff_module_access?.[
-      profile?.id ?? ""
-    ] as StaffModuleKey[] | undefined;
+    const staffModuleAccessRaw = organization?.settings?.staff_module_access;
+    const staffModuleAccess =
+      staffModuleAccessRaw && typeof staffModuleAccessRaw === "object"
+        ? (staffModuleAccessRaw as Record<string, unknown>)
+        : undefined;
+    const staffOverrideRaw = staffModuleAccess?.[profile?.id ?? ""];
+    const staffOverride = Array.isArray(staffOverrideRaw)
+      ? staffOverrideRaw.filter(
+          (module): module is StaffModuleKey => typeof module === "string"
+        )
+      : undefined;
     const staffFiltered =
       Array.isArray(staffOverride) && staffOverride.length
         ? filterNavByStaffModules({

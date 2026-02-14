@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     return await updateSession(request);
   } catch (error) {
-    console.error("Error in Supabase middleware updateSession", error);
+    console.error("Error in Supabase proxy updateSession", error);
     // Fail open to avoid breaking all routes with a 500.
     return NextResponse.next();
   }

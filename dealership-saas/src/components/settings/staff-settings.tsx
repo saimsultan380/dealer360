@@ -54,6 +54,7 @@ import {
   normalizeStaffModules,
   type StaffModuleKey,
 } from "@/lib/auth/module-access";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 const roleOptions: Array<Exclude<UserRole, "super_admin">> = [
   "admin",
@@ -74,28 +75,28 @@ export function StaffSettings() {
     return profile?.role === "admin" || profile?.role === "super_admin";
   }, [profile?.role]);
 
-  const orgFeatureFlags = (organization?.feature_flags ?? {}) as any;
+  const orgFeatureFlags = organization?.feature_flags;
   const orgModuleEnabled = useMemo(() => {
-    // Backward compatibility: undefined means "enabled" for most modules.
-    const fallbackTrue = (v: any) => (v === undefined ? true : !!v);
-
     const enabledByKey: Record<StaffModuleKey, boolean> = {
       dashboard: true,
       settings: true,
       today_book: true,
-      inventory: fallbackTrue(orgFeatureFlags?.enable_inventory),
-      sales: fallbackTrue(orgFeatureFlags?.enable_sales),
-      exchange_deals: fallbackTrue(orgFeatureFlags?.enable_exchange_deals),
-      financing: fallbackTrue(orgFeatureFlags?.enable_financing),
-      leads: fallbackTrue(orgFeatureFlags?.enable_leads),
-      deals: fallbackTrue(orgFeatureFlags?.enable_deals),
-      documents: fallbackTrue(orgFeatureFlags?.enable_documents),
-      cash_flow: fallbackTrue(orgFeatureFlags?.enable_cash_flow),
-      ledger: fallbackTrue(orgFeatureFlags?.enable_ledger),
-      clients: fallbackTrue(orgFeatureFlags?.enable_clients),
-      investors: fallbackTrue(orgFeatureFlags?.enable_investors),
-      // Off by default unless explicitly enabled
-      japan_import: !!orgFeatureFlags?.enable_japan_import,
+      inventory: isFeatureEnabled(orgFeatureFlags, "enable_inventory"),
+      sales: isFeatureEnabled(orgFeatureFlags, "enable_sales"),
+      exchange_deals: isFeatureEnabled(orgFeatureFlags, "enable_exchange_deals"),
+      financing: isFeatureEnabled(orgFeatureFlags, "enable_financing"),
+      leads: isFeatureEnabled(orgFeatureFlags, "enable_leads"),
+      deals: isFeatureEnabled(orgFeatureFlags, "enable_deals"),
+      documents: isFeatureEnabled(orgFeatureFlags, "enable_documents"),
+      cash_flow: isFeatureEnabled(orgFeatureFlags, "enable_cash_flow"),
+      ledger: isFeatureEnabled(orgFeatureFlags, "enable_ledger"),
+      clients: isFeatureEnabled(orgFeatureFlags, "enable_clients"),
+      investors: isFeatureEnabled(orgFeatureFlags, "enable_investors"),
+      japan_import: isFeatureEnabled(
+        orgFeatureFlags,
+        "enable_japan_import",
+        false
+      ),
     };
 
     return enabledByKey;

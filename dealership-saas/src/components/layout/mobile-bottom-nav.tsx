@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/lib/store';
 import { filterNavByRole } from '@/lib/auth/permissions';
 import { filterNavByStaffModules, type StaffModuleKey } from '@/lib/auth/module-access';
+import { isFeatureEnabled } from '@/lib/feature-flags';
 import type { LucideIcon } from 'lucide-react';
 
 type ModuleKey =
@@ -72,49 +73,53 @@ export function MobileBottomNav() {
     const { profile, organization } = useAuthStore();
 
     const role = profile?.role;
-    const featureFlags = organization?.feature_flags as any;
+    const featureFlags = organization?.feature_flags;
     const isEnabled = (key: string): boolean => {
         // Always allow core shell routes
         if (key === 'dashboard' || key === 'today_book' || key === 'settings') return true;
 
-        // Backward compatibility: if flags missing, default to existing behavior (enabled)
-        const fallbackTrue = (v: any) => (v === undefined ? true : !!v);
-
         switch (key) {
             case 'inventory':
-                return fallbackTrue(featureFlags?.enable_inventory);
+                return isFeatureEnabled(featureFlags, 'enable_inventory');
             case 'sales':
-                return fallbackTrue(featureFlags?.enable_sales);
+                return isFeatureEnabled(featureFlags, 'enable_sales');
             case 'exchange_deals':
-                return fallbackTrue(featureFlags?.enable_exchange_deals);
+                return isFeatureEnabled(featureFlags, 'enable_exchange_deals');
             case 'financing':
-                return fallbackTrue(featureFlags?.enable_financing);
+                return isFeatureEnabled(featureFlags, 'enable_financing');
             case 'leads':
-                return fallbackTrue(featureFlags?.enable_leads);
+                return isFeatureEnabled(featureFlags, 'enable_leads');
             case 'deals':
-                return fallbackTrue(featureFlags?.enable_deals);
+                return isFeatureEnabled(featureFlags, 'enable_deals');
             case 'documents':
-                return fallbackTrue(featureFlags?.enable_documents);
+                return isFeatureEnabled(featureFlags, 'enable_documents');
             case 'cash_flow':
-                return fallbackTrue(featureFlags?.enable_cash_flow);
+                return isFeatureEnabled(featureFlags, 'enable_cash_flow');
             case 'ledger':
-                return fallbackTrue(featureFlags?.enable_ledger);
+                return isFeatureEnabled(featureFlags, 'enable_ledger');
             case 'clients':
-                return fallbackTrue(featureFlags?.enable_clients);
+                return isFeatureEnabled(featureFlags, 'enable_clients');
             case 'investors':
-                return fallbackTrue(featureFlags?.enable_investors);
+                return isFeatureEnabled(featureFlags, 'enable_investors');
             case 'japan_import':
-                // Off by default unless explicitly enabled
-                return !!featureFlags?.enable_japan_import;
+                return isFeatureEnabled(featureFlags, 'enable_japan_import', false);
             default:
                 return true;
         }
     };
 
     const moduleFiltered = navigation.filter((item) => isEnabled(item.moduleKey));
-    const staffOverride = (organization?.settings as any)?.staff_module_access?.[profile?.id ?? ''] as
-        | StaffModuleKey[]
-        | undefined;
+    const staffModuleAccessRaw = organization?.settings?.staff_module_access;
+    const staffModuleAccess =
+        staffModuleAccessRaw && typeof staffModuleAccessRaw === 'object'
+            ? (staffModuleAccessRaw as Record<string, unknown>)
+            : undefined;
+    const staffOverrideRaw = staffModuleAccess?.[profile?.id ?? ''];
+    const staffOverride = Array.isArray(staffOverrideRaw)
+        ? staffOverrideRaw.filter(
+              (module): module is StaffModuleKey => typeof module === 'string'
+          )
+        : undefined;
     const staffFiltered =
         Array.isArray(staffOverride) && staffOverride.length
             ? filterNavByStaffModules({ modules: staffOverride, items: moduleFiltered })

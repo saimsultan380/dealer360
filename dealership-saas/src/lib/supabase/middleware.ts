@@ -8,6 +8,19 @@ import {
   type StaffModuleKey,
 } from "@/lib/auth/module-access";
 import type { FeatureFlags } from "@/lib/types/database";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+
+type OrganizationAccessPayload = {
+  feature_flags?: Partial<FeatureFlags> | null;
+  settings?: Record<string, unknown> | null;
+};
+
+function isStaffModuleList(value: unknown): value is StaffModuleKey[] {
+  return (
+    Array.isArray(value) &&
+    value.every((entry) => typeof entry === "string")
+  );
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -186,22 +199,21 @@ export async function updateSession(request: NextRequest) {
         .eq("id", orgId)
         .single();
 
-      const flags = ((org as any)?.feature_flags ??
-        {}) as Partial<FeatureFlags>;
-      const settings = ((org as any)?.settings ?? {}) as Record<
-        string,
-        unknown
-      >;
-      const staffMap = (settings as any)?.staff_module_access as
-        | Record<string, unknown>
-        | undefined;
-      const staffOverride = staffMap?.[user.id] as unknown;
+      const orgPayload = (org ?? null) as OrganizationAccessPayload | null;
+      const flags = orgPayload?.feature_flags ?? {};
+      const settings = orgPayload?.settings ?? {};
+      const rawStaffAccess = settings["staff_module_access"];
+      const staffMap =
+        rawStaffAccess && typeof rawStaffAccess === "object"
+          ? (rawStaffAccess as Record<string, unknown>)
+          : undefined;
+      const staffOverride = staffMap?.[user.id];
 
       // If staff override exists, enforce it at the route level.
-      if (Array.isArray(staffOverride) && staffOverride.length) {
+      if (isStaffModuleList(staffOverride) && staffOverride.length) {
         if (
           !canAccessPathByStaffModules({
-            modules: staffOverride as StaffModuleKey[],
+            modules: staffOverride,
             pathname: request.nextUrl.pathname,
           })
         ) {
@@ -212,36 +224,32 @@ export async function updateSession(request: NextRequest) {
         }
       }
 
-      // Backward compatible defaults: if missing, treat as enabled.
-      const enabled = (v: any, defaultValue = true) =>
-        v === undefined ? defaultValue : !!v;
-
       const pathname = request.nextUrl.pathname;
       const blocked =
         (pathname.startsWith("/dashboard/documents") &&
-          !enabled(flags.enable_documents)) ||
+          !isFeatureEnabled(flags, "enable_documents")) ||
         (pathname.startsWith("/dashboard/leads") &&
-          !enabled(flags.enable_leads)) ||
+          !isFeatureEnabled(flags, "enable_leads")) ||
         (pathname.startsWith("/dashboard/deals") &&
-          !enabled(flags.enable_deals)) ||
+          !isFeatureEnabled(flags, "enable_deals")) ||
         (pathname.startsWith("/dashboard/exchange-deals") &&
-          !enabled((flags as any).enable_exchange_deals)) ||
+          !isFeatureEnabled(flags, "enable_exchange_deals")) ||
         (pathname.startsWith("/dashboard/financing") &&
-          !enabled((flags as any).enable_financing)) ||
+          !isFeatureEnabled(flags, "enable_financing")) ||
         (pathname.startsWith("/dashboard/inventory") &&
-          !enabled((flags as any).enable_inventory)) ||
+          !isFeatureEnabled(flags, "enable_inventory")) ||
         (pathname.startsWith("/dashboard/sales") &&
-          !enabled((flags as any).enable_sales)) ||
+          !isFeatureEnabled(flags, "enable_sales")) ||
         (pathname.startsWith("/dashboard/investors") &&
-          !enabled((flags as any).enable_investors)) ||
+          !isFeatureEnabled(flags, "enable_investors")) ||
         (pathname.startsWith("/dashboard/clients") &&
-          !enabled((flags as any).enable_clients)) ||
+          !isFeatureEnabled(flags, "enable_clients")) ||
         (pathname.startsWith("/dashboard/cash-flow") &&
-          !enabled((flags as any).enable_cash_flow)) ||
+          !isFeatureEnabled(flags, "enable_cash_flow")) ||
         (pathname.startsWith("/dashboard/ledger") &&
-          !enabled((flags as any).enable_ledger)) ||
+          !isFeatureEnabled(flags, "enable_ledger")) ||
         (pathname.startsWith("/dashboard/japan-import") &&
-          !!(flags as any).enable_japan_import === false);
+          !isFeatureEnabled(flags, "enable_japan_import"));
 
       if (blocked) {
         const url = request.nextUrl.clone();

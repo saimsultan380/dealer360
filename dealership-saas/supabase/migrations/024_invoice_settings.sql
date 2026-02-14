@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.invoice_settings (
   slogan TEXT DEFAULT '',
   logo_url TEXT DEFAULT '',
   
-  -- Business Details
+  -- Business Details 
   ntn_number TEXT DEFAULT '',
   ceo_name TEXT DEFAULT '',
   phone_numbers TEXT[] DEFAULT '{}',

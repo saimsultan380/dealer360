@@ -21,6 +21,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { updateOrganizationAdmin } from "@/lib/actions/organizations";
 import { useFormattedInput } from "@/lib/hooks/use-formatted-input";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import type { FeatureFlags } from "@/lib/types/database";
 
 type Org = any;
 
@@ -46,7 +48,7 @@ export function OrganizationEditor({ organization }: { organization: Org }) {
   );
 
   const flags = useMemo(
-    () => (organization?.feature_flags ?? {}) as Record<string, any>,
+    () => (organization?.feature_flags ?? {}) as Partial<FeatureFlags>,
     [organization]
   );
   const [maxVehicles, setMaxVehicles] = useState<string>(
@@ -59,58 +61,55 @@ export function OrganizationEditor({ organization }: { organization: Org }) {
     String(flags.dealership_type ?? "local")
   );
 
-  // Backward compatibility: undefined means "enabled" for most modules.
-  const fallbackTrue = (v: any) => (v === undefined ? true : !!v);
-
   const [enableInventory, setEnableInventory] = useState(
-    fallbackTrue(flags.enable_inventory)
+    isFeatureEnabled(flags, "enable_inventory")
   );
   const [enableSales, setEnableSales] = useState(
-    fallbackTrue(flags.enable_sales)
+    isFeatureEnabled(flags, "enable_sales")
   );
   const [enableExchangeDeals, setEnableExchangeDeals] = useState(
-    fallbackTrue(flags.enable_exchange_deals)
+    isFeatureEnabled(flags, "enable_exchange_deals")
   );
   const [enableFinancing, setEnableFinancing] = useState(
-    fallbackTrue(flags.enable_financing)
+    isFeatureEnabled(flags, "enable_financing")
   );
   const [enableLeads, setEnableLeads] = useState(
-    fallbackTrue(flags.enable_leads)
+    isFeatureEnabled(flags, "enable_leads")
   );
   const [enableDeals, setEnableDeals] = useState(
-    fallbackTrue(flags.enable_deals)
+    isFeatureEnabled(flags, "enable_deals")
   );
   const [enableDocuments, setEnableDocuments] = useState(
-    fallbackTrue(flags.enable_documents)
+    isFeatureEnabled(flags, "enable_documents")
   );
   const [enableCashFlow, setEnableCashFlow] = useState(
-    fallbackTrue(flags.enable_cash_flow)
+    isFeatureEnabled(flags, "enable_cash_flow")
   );
   const [enableLedger, setEnableLedger] = useState(
-    fallbackTrue(flags.enable_ledger)
+    isFeatureEnabled(flags, "enable_ledger")
   );
   const [enableClients, setEnableClients] = useState(
-    fallbackTrue(flags.enable_clients)
+    isFeatureEnabled(flags, "enable_clients")
   );
   const [enableInvestors, setEnableInvestors] = useState(
-    fallbackTrue(flags.enable_investors)
+    isFeatureEnabled(flags, "enable_investors")
   );
 
   // Japan import is off unless explicitly enabled.
   const [enableJapanImport, setEnableJapanImport] = useState(
-    !!flags.enable_japan_import
+    isFeatureEnabled(flags, "enable_japan_import", false)
   );
   const [enableImportDocuments, setEnableImportDocuments] = useState(
-    !!flags.enable_import_documents
+    isFeatureEnabled(flags, "enable_import_documents", false)
   );
   const [enableImportShipments, setEnableImportShipments] = useState(
-    !!flags.enable_import_shipments
+    isFeatureEnabled(flags, "enable_import_shipments", false)
   );
   const [enableImportCustoms, setEnableImportCustoms] = useState(
-    !!flags.enable_import_customs
+    isFeatureEnabled(flags, "enable_import_customs", false)
   );
   const [enableImportInspections, setEnableImportInspections] = useState(
-    !!flags.enable_import_inspections
+    isFeatureEnabled(flags, "enable_import_inspections", false)
   );
 
   const phoneInput = useFormattedInput({
