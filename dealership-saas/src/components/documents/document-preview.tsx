@@ -48,6 +48,7 @@ export function DocumentPreview({ doc }: DocumentPreviewProps) {
                     alt={doc.file_name}
                     fill
                     className="object-contain"
+                    sizes="(max-width: 1024px) 100vw, 800px"
                     onError={() => setError(true)}
                 />
             </div>

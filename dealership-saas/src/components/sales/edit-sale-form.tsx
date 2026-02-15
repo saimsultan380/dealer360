@@ -126,6 +126,7 @@ export function EditSaleForm({ sale }: EditSaleFormProps) {
                                     alt={`${vehicle?.make} ${vehicle?.model}`}
                                     fill
                                     className="object-cover"
+                                    sizes="112px"
                                 />
                             ) : (
                                 <div className="h-full w-full flex items-center justify-center">

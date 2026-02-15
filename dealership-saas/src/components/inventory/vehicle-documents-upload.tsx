@@ -486,6 +486,7 @@ export function VehicleDocumentsUpload({
                     alt="Captured preview"
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 512px"
                   />
                 </div>
               ) : (

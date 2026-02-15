@@ -1,14 +1,21 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
+import { useEffect, useRef } from "react";
 import type {
   RealtimeChannel,
   RealtimePostgresChangesPayload,
 } from "@supabase/supabase-js";
+import { createClient } from "./client";
 
 /**
- * Realtime subscription manager for live data updates
- * Handles subscriptions to database changes with proper cleanup
+ * Realtime subscription manager for live data updates.
+ * Handles subscriptions to database changes with proper cleanup.
+ *
+ * Architecture (SaaS-ready):
+ * - One channel per subscriptionId; re-subscribe replaces in place (Strict Mode / HMR safe).
+ * - Unsubscribe is idempotent; safe to call multiple times.
+ * - Prefer page-level or feature-level subscriptions with stable IDs (e.g. "vehicles_<orgId>").
+ * - Use refs for callbacks in effects so deps are [orgId, table, filter] only.
  */
 
 interface SubscriptionConfig {
@@ -26,10 +33,7 @@ interface SubscriptionCallbacks {
 }
 
 class RealtimeManager {
-  private supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  private supabase = createClient();
   private channels: Map<string, RealtimeChannel> = new Map();
   private subscriptions: Map<string, () => void> = new Map();
   private warnedChannelError = false;
@@ -37,22 +41,32 @@ class RealtimeManager {
   constructor() {}
 
   /**
-   * Subscribe to realtime database changes
+   * Subscribe to realtime database changes.
+   * If subscriptionId already exists, the existing channel is replaced (one channel per ID).
+   * Safe for React Strict Mode: cleanup is idempotent; re-subscribe replaces in place.
+   *
    * @param config Subscription configuration (table, events, filters)
    * @param callbacks Callbacks for INSERT, UPDATE, DELETE events
-   * @param subscriptionId Unique ID for this subscription (for cleanup)
-   * @returns Unsubscribe function
+   * @param subscriptionId Unique ID for this subscription (stable per component/lifecycle)
+   * @returns Unsubscribe function (idempotent; safe to call multiple times)
    */
   subscribe(
     config: SubscriptionConfig,
     callbacks: SubscriptionCallbacks,
     subscriptionId: string = `${config.table}_${Date.now()}_${Math.random()}`
   ): () => void {
+    // Replace existing subscription with same ID to avoid duplicates (e.g. Strict Mode re-run)
+    const existing = this.channels.get(subscriptionId);
+    if (existing) {
+      this.supabase.removeChannel(existing);
+      this.channels.delete(subscriptionId);
+      this.subscriptions.delete(subscriptionId);
+    }
+
     const channelName = `realtime_${subscriptionId}`;
     const schema = config.schema || "public";
     const event = config.event || "*";
 
-    // Create channel
     const channel = this.supabase.channel(channelName);
 
     // Subscribe to changes
@@ -110,10 +124,10 @@ class RealtimeManager {
         }
       });
 
-    // Store channel and unsubscribe function
     this.channels.set(subscriptionId, channel);
 
     const unsubscribe = () => {
+      if (!this.channels.has(subscriptionId)) return;
       this.unsubscribe(subscriptionId);
     };
 
@@ -130,7 +144,9 @@ class RealtimeManager {
       this.supabase.removeChannel(channel);
       this.channels.delete(subscriptionId);
       this.subscriptions.delete(subscriptionId);
-      console.log(`Unsubscribed from realtime ${subscriptionId}`);
+      if (process.env.NODE_ENV === "development") {
+        console.debug(`[Realtime] unsubscribed: ${subscriptionId}`);
+      }
     }
   }
 
@@ -151,35 +167,60 @@ class RealtimeManager {
   }
 }
 
-// Singleton instance
-let realtimeManager: RealtimeManager | null = null;
+declare global {
+  var __realtime_manager__: RealtimeManager | undefined;
+}
 
 /**
  * Get the global realtime manager instance
  */
 export function getRealtimeManager(): RealtimeManager {
-  if (!realtimeManager) {
-    realtimeManager = new RealtimeManager();
+  if (!globalThis.__realtime_manager__) {
+    globalThis.__realtime_manager__ = new RealtimeManager();
   }
-  return realtimeManager;
+
+  return globalThis.__realtime_manager__;
 }
 
 /**
- * Hook for subscribing to realtime updates in React components
- * Automatically handles cleanup on unmount
+ * Hook for subscribing to realtime updates in React components.
+ * Uses refs for callbacks so effect only re-runs when table/schema/filter/subscriptionId change.
+ * Safe for Strict Mode and HMR: one subscription per subscriptionId, idempotent cleanup.
+ *
+ * @param config Table, schema, event, filter
+ * @param callbacks Stored in a ref; always current when events fire
+ * @param subscriptionId Stable ID (e.g. from useId or constant). Required for predictable cleanup.
  */
-export function useRealtimeSubscription<T = any>(
+export function useRealtimeSubscription(
   config: SubscriptionConfig,
   callbacks: SubscriptionCallbacks,
-  subscriptionId?: string
+  subscriptionId: string
 ) {
-  const { useEffect } = require("react");
   const manager = getRealtimeManager();
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
+
+  const table = config.table;
+  const schema = config.schema ?? "public";
+  const filter = config.filter;
+  const event = config.event;
 
   useEffect(() => {
-    const unsubscribe = manager.subscribe(config, callbacks, subscriptionId);
-    return unsubscribe;
-  }, [config.table, config.schema, config.filter]);
+    const stableConfig: SubscriptionConfig = {
+      table,
+      schema,
+      filter,
+      event,
+    };
+    const proxyCallbacks: SubscriptionCallbacks = {
+      onInsert: (p) => callbacksRef.current.onInsert?.(p),
+      onUpdate: (p) => callbacksRef.current.onUpdate?.(p),
+      onDelete: (p) => callbacksRef.current.onDelete?.(p),
+      onError: (e) => callbacksRef.current.onError?.(e),
+    };
+    const unsub = manager.subscribe(stableConfig, proxyCallbacks, subscriptionId);
+    return unsub;
+  }, [manager, table, schema, filter, event, subscriptionId]);
 }
 
 /**

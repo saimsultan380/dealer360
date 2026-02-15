@@ -472,7 +472,7 @@ export function DocumentUpload({ entityType, entityId, onSuccess, className }: D
                         <div className="rounded-lg border bg-muted overflow-hidden">
                             {capturedUrl ? (
                                 <div className="relative aspect-video w-full">
-                                    <Image src={capturedUrl} alt="Captured preview" fill className="object-cover" />
+                                    <Image src={capturedUrl} alt="Captured preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 512px" />
                                 </div>
                             ) : (
                                 <div className="relative aspect-video w-full bg-black">

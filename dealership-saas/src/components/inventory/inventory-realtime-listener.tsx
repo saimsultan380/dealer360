@@ -1,45 +1,31 @@
 'use client';
 
-import { useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { subscribeToVehicles } from '@/lib/supabase/realtime';
 
 /**
- * Realtime listener component that automatically refreshes the inventory page
- * when vehicles are created, updated, or deleted in Supabase.
- * 
- * This enables real-time synchronization across multiple browser tabs/devices.
+ * Realtime listener that refreshes the inventory page when vehicles change.
+ * Uses centralized RealtimeManager and a stable subscription ID so only one
+ * channel is created (Strict Mode / HMR safe). Callback uses ref to avoid
+ * effect re-runs when router identity changes.
  */
 export function InventoryRealtimeListener() {
     const router = useRouter();
+    const routerRef = useRef(router);
+    routerRef.current = router;
 
     useEffect(() => {
-        const supabase = createClient();
+        const unsubscribe = subscribeToVehicles(
+            {
+                onInsert: () => routerRef.current.refresh(),
+                onUpdate: () => routerRef.current.refresh(),
+                onDelete: () => routerRef.current.refresh(),
+            },
+            undefined // all orgs; filter can be added if page is org-scoped
+        );
+        return unsubscribe;
+    }, []);
 
-        // Subscribe to changes on the vehicles table
-        const channel = supabase
-            .channel('inventory-realtime')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*', // Listen to INSERT, UPDATE, DELETE
-                    schema: 'public',
-                    table: 'vehicles',
-                },
-                (payload) => {
-                    console.log('Inventory change detected:', payload.eventType, payload.new || payload.old);
-                    // Refresh the current page to show updated data
-                    router.refresh();
-                }
-            )
-            .subscribe();
-
-        // Cleanup subscription on unmount
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [router]);
-
-    // This component doesn't render anything
     return null;
 }

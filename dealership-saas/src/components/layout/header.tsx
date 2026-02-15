@@ -18,6 +18,7 @@ import {
   Wallet,
   Search,
   Command,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,7 +36,7 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useSidebarStore, useAuthStore } from "@/lib/store";
+import { useSidebarStore, useAuthStore, useBreadcrumbStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
 import { MobileSidebar } from "./mobile-sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -55,6 +56,7 @@ export function Header() {
   const pathname = usePathname();
   const { profile, organization } = useAuthStore();
   const { isCollapsed } = useSidebarStore();
+  const { breadcrumbLabel, setBreadcrumbLabel } = useBreadcrumbStore();
   const [pendingDeals, setPendingDeals] = useState<PendingDeal[]>([]);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>(
     []
@@ -221,22 +223,48 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Module */}
-        <div className="min-w-0">
-          <div className="flex items-baseline gap-2 min-w-0">
-            <h2 className="text-sm sm:text-base md:text-lg font-semibold truncate">
+        {/* Page title + breadcrumb – refined hierarchy and readable breadcrumb */}
+        <div
+          className={cn(
+            "min-w-0 flex-1 pl-3 sm:pl-4 py-1.5",
+            "flex flex-col justify-center gap-1",
+            "border-l border-border/80"
+          )}
+        >
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
               {moduleName}
-            </h2>
-            {!showBrandText && organization?.name && (
-              <span className="hidden md:inline text-xs text-muted-foreground truncate">
-                {organization.name}
+            </h1>
+            {organization?.name && (
+              <span className="hidden sm:inline-flex items-center shrink-0 gap-1 text-xs text-muted-foreground">
+                <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                <span className="truncate max-w-[140px]">{organization.name}</span>
               </span>
             )}
           </div>
           {pathname !== "/dashboard" && pathname !== "/dashboard/" && (
-            <p className="hidden sm:block text-xs text-muted-foreground truncate">
-              {pathname.replace("/dashboard", "") || "/"}
-            </p>
+            <nav
+              aria-label="Breadcrumb"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0"
+            >
+              {breadcrumbLabel ? (
+                <>
+                  <span className="truncate opacity-80">{moduleName}</span>
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                  <span className="truncate font-medium text-foreground/95">
+                    {breadcrumbLabel}
+                  </span>
+                </>
+              ) : (
+                <span className="truncate font-mono text-[11px] opacity-90">
+                  {pathname
+                    .replace("/dashboard", "")
+                    .split("/")
+                    .filter(Boolean)
+                    .join(" / ") || "/"}
+                </span>
+              )}
+            </nav>
           )}
         </div>
       </div>

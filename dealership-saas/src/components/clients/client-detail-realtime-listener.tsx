@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   subscribeToClient,
   subscribeToClientTransactionsForClient,
@@ -16,17 +16,21 @@ interface ClientDetailRealtimeListenerProps {
 /**
  * Realtime listener that refreshes client details when relevant data changes.
  * Subscribes to: clients, client_transactions, and deals (for total_dues).
+ * Uses ref for onRefresh so effect only depends on clientId/organizationId (Strict Mode safe).
  */
 export function ClientDetailRealtimeListener({
   clientId,
   organizationId,
   onRefresh,
 }: ClientDetailRealtimeListenerProps) {
+  const onRefreshRef = useRef(onRefresh);
+  onRefreshRef.current = onRefresh;
+
   useEffect(() => {
     if (!clientId) return;
 
     const handleChange = () => {
-      onRefresh();
+      onRefreshRef.current();
     };
 
     const unsubClient = subscribeToClient(clientId, {
@@ -55,7 +59,7 @@ export function ClientDetailRealtimeListener({
       unsubTransactions();
       unsubDeals();
     };
-  }, [clientId, organizationId, onRefresh]);
+  }, [clientId, organizationId]);
 
   return null;
 }

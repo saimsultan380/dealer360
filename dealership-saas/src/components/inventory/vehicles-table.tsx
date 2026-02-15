@@ -219,6 +219,7 @@ export function VehiclesTable({
                         alt={`${vehicle.make} ${vehicle.model}`}
                         fill
                         className="object-cover"
+                        sizes="80px"
                       />
                     </div>
                   </TableCell>

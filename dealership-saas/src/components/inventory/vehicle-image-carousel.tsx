@@ -60,6 +60,7 @@ export function VehicleImageCarousel(props: {
           )}
           sizes="(max-width: 1024px) 100vw, 900px"
           priority
+          loading="eager"
         />
 
         {hasImages && images.length > 1 && (

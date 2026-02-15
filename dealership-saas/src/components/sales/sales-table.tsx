@@ -267,6 +267,7 @@ export function SalesTable({
                               alt={`${vehicle?.make} ${vehicle?.model}`}
                               fill
                               className="object-cover"
+                              sizes="80px"
                             />
                           ) : (
                             <div className="h-full w-full flex items-center justify-center">

@@ -420,6 +420,7 @@ export function ChassisImageUpload({
                     alt="Captured preview"
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 512px"
                   />
                 </div>
               ) : (
@@ -495,6 +496,7 @@ export function ChassisImageUpload({
             alt="Chassis number"
             fill
             className="object-cover"
+            sizes="(max-width: 448px) 100vw, 448px"
           />
           <button
             type="button"

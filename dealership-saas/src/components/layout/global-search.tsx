@@ -207,19 +207,20 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         onClick={() => onOpenChange(false)}
       />
 
-      {/* Search Panel */}
-      <div className="fixed inset-0 z-50 flex items-start justify-center px-3 pt-[12vh] sm:pt-[15vh] pointer-events-none">
+      {/* Search Panel - responsive: full width on small screens, centered max-width on larger */}
+      <div className="fixed inset-0 z-50 flex items-start justify-center p-2 xs:p-3 sm:p-4 pt-[8vh] xs:pt-[10vh] sm:pt-[12vh] md:pt-[15vh] pointer-events-none">
         <div
           className={cn(
             "pointer-events-auto w-full max-w-2xl",
             "bg-background border rounded-xl shadow-2xl",
             "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200",
-            "flex flex-col max-h-[70vh] sm:max-h-[65vh]"
+            "flex flex-col",
+            "max-h-[82vh] xs:max-h-[78vh] sm:max-h-[72vh] md:max-h-[65vh]"
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Search Input */}
-          <div className="flex items-center gap-2 px-3 sm:px-4 border-b">
+          {/* Search Input + Close */}
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-0 border-b min-h-12 sm:min-h-14">
             <Search className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground shrink-0" />
             <input
               ref={inputRef}
@@ -228,7 +229,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search inventory, deals, clients, investors..."
-              className="flex-1 h-12 sm:h-14 bg-transparent text-sm sm:text-base outline-none placeholder:text-muted-foreground/60"
+              className="flex-1 min-w-0 h-10 sm:h-12 bg-transparent text-sm sm:text-base outline-none placeholder:text-muted-foreground/60"
               autoComplete="off"
               spellCheck={false}
             />
@@ -237,8 +238,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
             )}
             {query && !isLoading && (
               <button
+                type="button"
                 onClick={() => setQuery("")}
-                className="p-1 rounded-md hover:bg-muted transition-colors"
+                className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                aria-label="Clear search"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -246,16 +249,25 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
             <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               ESC
             </kbd>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="p-1.5 sm:p-2 rounded-md hover:bg-muted transition-colors shrink-0"
+              aria-label="Close search"
+            >
+              <X className="h-4 w-4 sm:h-4.5 sm:w-4.5 text-muted-foreground" />
+            </button>
           </div>
 
-          {/* Category Pills */}
-          <div className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 border-b overflow-x-auto scrollbar-none">
+          {/* Category Pills - scrollable on small screens */}
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-4 py-2 border-b overflow-x-auto scrollbar-none scroll-smooth touch-pan-x">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
+                type="button"
                 onClick={() => setCategory(cat.value)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all",
+                  "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 min-h-[2rem]",
                   category === cat.value
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -275,7 +287,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
           >
             {/* Empty State - Initial */}
             {!hasSearched && !query && (
-              <div className="flex flex-col items-center justify-center py-10 sm:py-14 px-4 text-center">
+              <div className="flex flex-col items-center justify-center py-8 xs:py-10 sm:py-14 px-3 sm:px-4 text-center">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Sparkles className="h-6 w-6 text-primary" />
                 </div>
@@ -285,7 +297,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 <p className="text-xs text-muted-foreground max-w-xs">
                   Search across all your inventory, deals, clients, investors, leads, cash flow, and financing records instantly.
                 </p>
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                   <kbd className="inline-flex h-6 items-center gap-1 rounded border bg-muted px-2 font-mono text-[10px] font-medium text-muted-foreground">
                     <Command className="h-3 w-3" />K
                   </kbd>
@@ -296,7 +308,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
             {/* Empty State - No results */}
             {hasSearched && results.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-10 sm:py-14 px-4 text-center">
+              <div className="flex flex-col items-center justify-center py-8 xs:py-10 sm:py-14 px-3 sm:px-4 text-center">
                 <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
                   <Search className="h-6 w-6 text-muted-foreground" />
                 </div>

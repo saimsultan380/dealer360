@@ -465,6 +465,7 @@ export function PartyDocumentsUpload({
                     alt="Captured preview"
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 512px"
                   />
                 </div>
               ) : (
@@ -545,6 +546,7 @@ export function PartyDocumentsUpload({
                 alt={`${party} document`}
                 fill
                 className="object-cover"
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
               />
               <button
                 type="button"

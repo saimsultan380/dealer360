@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { VehicleImageCarousel } from "@/components/inventory/vehicle-image-carousel";
+import { SetHeaderBreadcrumb } from "@/components/layout/set-header-breadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientAvatarUrl } from "@/lib/utils/avatar-url";
 
@@ -298,6 +299,7 @@ export default async function VehicleDetailPage({
                         alt="Seller"
                         fill
                         className="object-cover"
+                        sizes="48px"
                       />
                     </div>
                     <div className="min-w-0">
@@ -318,6 +320,7 @@ export default async function VehicleDetailPage({
                         alt="Buyer"
                         fill
                         className="object-cover"
+                        sizes="48px"
                       />
                     </div>
                     <div className="min-w-0">
@@ -519,8 +522,11 @@ export default async function VehicleDetailPage({
     const canShowDocuments = !!chassisDoc || vehicleDocs.length > 0;
     const canShowDeals = (deals || []).length > 0;
 
+    const vehicleTitle = `${vehicle.year ?? ""} ${vehicle.make ?? ""} ${vehicle.model ?? ""}`.trim() || "Vehicle";
+
     return (
       <div className="space-y-6">
+        <SetHeaderBreadcrumb label={vehicleTitle} />
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
@@ -1031,6 +1037,7 @@ export default async function VehicleDetailPage({
                                   alt="Seller"
                                   fill
                                   className="object-cover"
+                                  sizes="56px"
                                 />
                               </div>
                               <div className="min-w-0 text-sm space-y-1">
@@ -1066,6 +1073,7 @@ export default async function VehicleDetailPage({
                                       alt="Seller document"
                                       fill
                                       className="object-cover"
+                                      sizes="64px"
                                     />
                                   </a>
                                 ))}
@@ -1100,6 +1108,7 @@ export default async function VehicleDetailPage({
                                   alt="Buyer"
                                   fill
                                   className="object-cover"
+                                  sizes="56px"
                                 />
                               </div>
                               <div className="min-w-0 text-sm space-y-1">
@@ -1135,6 +1144,7 @@ export default async function VehicleDetailPage({
                                       alt="Buyer document"
                                       fill
                                       className="object-cover"
+                                      sizes="64px"
                                     />
                                   </a>
                                 ))}
@@ -1165,6 +1175,7 @@ export default async function VehicleDetailPage({
                                 alt="Chassis number"
                                 fill
                                 className="object-contain bg-muted"
+                                sizes="(max-width: 1024px) 100vw, 800px"
                               />
                             </a>
                           </div>
