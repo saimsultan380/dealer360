@@ -84,6 +84,10 @@ export async function updateSession(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    // Preserve /admin intent so super_admin can be sent there after login
+    if (pathname.startsWith("/admin")) {
+      url.searchParams.set("next", "/admin");
+    }
     return NextResponse.redirect(url);
   }
 
@@ -132,10 +136,10 @@ export async function updateSession(request: NextRequest) {
     }
   };
 
-  // Role-based redirect for /admin routes
-  if (!DEV_BYPASS_AUTH && user && pathname.startsWith("/admin")) {
-    // If we can't read the profile row due to RLS, don't incorrectly treat the user as non-admin.
-    // Use `is_super_admin()` as a robust source of truth.
+  // CRITICAL: Always restrict /admin to super_admin only (platform owner).
+  // Do NOT skip this when DEV_BYPASS_AUTH is true — otherwise any logged-in
+  // organization/dealer admin could open /admin and see the super admin panel.
+  if (user && pathname.startsWith("/admin")) {
     const allowed = await isSuperAdmin();
     if (!allowed) {
       const url = request.nextUrl.clone();

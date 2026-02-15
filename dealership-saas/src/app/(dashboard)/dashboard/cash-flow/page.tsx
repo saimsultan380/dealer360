@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthStore } from '@/lib/store';
+import { subscribeToCashTransactions } from '@/lib/supabase/realtime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +57,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function CashFlowPage() {
     const router = useRouter();
+    const { organization } = useAuthStore();
     const [summary, setSummary] = useState<CashFlowSummary | null>(null);
     const [transactions, setTransactions] = useState<CashTransactionWithCategory[]>([]);
     const [loading, setLoading] = useState(true);
@@ -64,36 +67,55 @@ export default function CashFlowPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
     const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+    const fetchDataRef = useRef<() => void>(() => {});
+
+    const fetchData = () => {
+        setLoading(true);
+        setError(null);
+
+        Promise.all([
+            getCashFlowSummary(),
+            getCashTransactions({
+                transaction_type: filterType === 'all' ? undefined : filterType,
+            }),
+        ]).then(([summaryResult, transactionsResult]) => {
+            if (summaryResult.error) {
+                setError(summaryResult.error);
+            } else {
+                setSummary(summaryResult.data);
+            }
+            if (transactionsResult.error) {
+                setError(transactionsResult.error);
+            } else {
+                setTransactions(transactionsResult.data || []);
+            }
+            setLoading(false);
+        });
+    };
+
+    useEffect(() => {
+        fetchDataRef.current = fetchData;
+    });
 
     useEffect(() => {
         fetchData();
     }, [filterType]);
 
-    const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-        
-        const [summaryResult, transactionsResult] = await Promise.all([
-            getCashFlowSummary(),
-            getCashTransactions({
-                transaction_type: filterType === 'all' ? undefined : filterType,
-            }),
-        ]);
+    // Realtime: refetch summary and transactions when cash_transactions change
+    useEffect(() => {
+        const orgId = organization?.id;
+        if (!orgId) return;
 
-        if (summaryResult.error) {
-            setError(summaryResult.error);
-        } else {
-            setSummary(summaryResult.data);
-        }
-
-        if (transactionsResult.error) {
-            setError(transactionsResult.error);
-        } else {
-            setTransactions(transactionsResult.data || []);
-        }
-
-        setLoading(false);
-    };
+        const unsub = subscribeToCashTransactions(
+            {
+                onInsert: () => fetchDataRef.current(),
+                onUpdate: () => fetchDataRef.current(),
+                onDelete: () => fetchDataRef.current(),
+            },
+            orgId
+        );
+        return () => unsub();
+    }, [organization?.id]);
 
     const handleDelete = async (id: string) => {
         const result = await deleteCashTransaction(id);
@@ -154,12 +176,12 @@ export default function CashFlowPage() {
 
     if (loading) {
         return (
-            <div className="space-y-8">
+            <div className="space-y-8 w-full min-w-0">
                 <div>
                     <Skeleton className="h-9 w-64 mb-2" />
-                    <Skeleton className="h-5 w-96" />
+                    <Skeleton className="h-5 w-48 sm:w-96" />
                 </div>
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[...Array(4)].map((_, i) => (
                         <Card key={i}>
                             <CardHeader>
@@ -176,16 +198,16 @@ export default function CashFlowPage() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 w-full min-w-0">
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Cash Flow</h1>
-                    <p className="text-muted-foreground">
+                <div className="min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Cash Flow</h1>
+                    <p className="text-sm text-muted-foreground">
                         Manage cash in, cash out, and showroom expenses
                     </p>
                 </div>
-                <div className="flex flex-row gap-2">
+                <div className="flex flex-wrap gap-2">
                     <Button 
                         variant="outline" 
                         onClick={() => setCategoryDialogOpen(true)}
@@ -200,9 +222,9 @@ export default function CashFlowPage() {
                 </div>
             </div>
 
-            {/* Summary Cards */}
+            {/* Summary Cards - responsive: 1 col mobile, 2 cols sm, 4 cols lg */}
             {summary && (
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Current Balance</CardTitle>
@@ -265,18 +287,14 @@ export default function CashFlowPage() {
                 </div>
             )}
 
-            {/* Tabs for Charts and Transactions */}
-            <Tabs defaultValue="charts" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="charts">Charts & Analytics</TabsTrigger>
-                    <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            {/* Tabs: Transactions first and default */}
+            <Tabs defaultValue="transactions" className="space-y-4">
+                <TabsList className="w-full sm:w-auto flex flex-wrap h-auto gap-1 p-1">
+                    <TabsTrigger value="transactions" className="flex-1 sm:flex-none">Transactions</TabsTrigger>
+                    <TabsTrigger value="charts" className="flex-1 sm:flex-none">Charts & Analytics</TabsTrigger>
                 </TabsList>
-                
-                <TabsContent value="charts" className="space-y-4">
-                    <CashFlowCharts />
-                </TabsContent>
-                
-                <TabsContent value="transactions" className="space-y-4">
+
+                <TabsContent value="transactions" className="space-y-4 mt-4">
                     {/* Transactions Table */}
             <Card>
                 <CardHeader>
@@ -290,8 +308,8 @@ export default function CashFlowPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex gap-4 mb-4">
-                        <div className="relative flex-1">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
+                        <div className="relative flex-1 min-w-0">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                             <Input
                                 placeholder="Search transactions..."
@@ -301,7 +319,7 @@ export default function CashFlowPage() {
                             />
                         </div>
                         <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-full sm:w-[180px]">
                                 <SelectValue placeholder="Filter by type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -313,8 +331,8 @@ export default function CashFlowPage() {
                         </Select>
                     </div>
 
-                    <div className="rounded-md border">
-                        <Table>
+                    <div className="rounded-md border overflow-x-auto -mx-1 px-1 sm:mx-0 sm:px-0">
+                        <Table className="min-w-[640px]">
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Date</TableHead>
@@ -413,6 +431,10 @@ export default function CashFlowPage() {
                     </div>
                 </CardContent>
             </Card>
+                </TabsContent>
+
+                <TabsContent value="charts" className="space-y-4 mt-4">
+                    <CashFlowCharts />
                 </TabsContent>
             </Tabs>
 

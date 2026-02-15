@@ -54,7 +54,19 @@ function LoginPageInner() {
       return;
     }
 
-    router.push("/dashboard");
+    const nextParam = searchParams.get("next");
+    if (nextParam === "/admin") {
+      const { data: isSuperAdmin } = await supabase.rpc("is_super_admin");
+      router.push(isSuperAdmin ? "/admin" : "/dashboard?error=admin_required");
+    } else if (
+      nextParam &&
+      (nextParam === "/dashboard" || nextParam.startsWith("/dashboard/"))
+    ) {
+      router.push(nextParam);
+    } else {
+      const { data: isSuperAdmin } = await supabase.rpc("is_super_admin");
+      router.push(isSuperAdmin ? "/admin" : "/dashboard");
+    }
     router.refresh();
   };
 

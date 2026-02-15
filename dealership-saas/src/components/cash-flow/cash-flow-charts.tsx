@@ -134,15 +134,15 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Filters */}
-            <Card>
+        <div className="space-y-6 w-full min-w-0">
+            {/* Filters - responsive grid */}
+            <Card className="overflow-hidden">
                 <CardHeader>
                     <CardTitle>Chart Filters</CardTitle>
                     <CardDescription>Select time period and date range for analysis</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid gap-4 md:grid-cols-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="space-y-2">
                             <Label>Time Period</Label>
                             <Select value={period} onValueChange={(value: Period) => setPeriod(value)}>
@@ -201,23 +201,23 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
                 </CardContent>
             </Card>
 
-            {/* Cash Flow Trend Chart */}
-            <Card>
+            {/* Cash Flow Trend Chart - responsive height and overflow */}
+            <Card className="overflow-hidden">
                 <CardHeader>
                     <CardTitle>Cash Flow Trend</CardTitle>
                     <CardDescription>Cash in, cash out, and expenses over time</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="w-full min-w-0">
                     {loading ? (
-                        <Skeleton className="h-[400px] w-full" />
+                        <Skeleton className="h-[250px] sm:h-[320px] md:h-[400px] w-full" />
                     ) : timeSeriesData.length === 0 ? (
-                        <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                        <div className="h-[250px] sm:h-[320px] md:h-[400px] flex items-center justify-center text-muted-foreground text-sm">
                             No data available for the selected period
                         </div>
                     ) : (
-                        <div className="h-[400px]">
-                            <ChartContainer config={timeSeriesChartConfig} className="h-full w-full">
-                                <AreaChart data={timeSeriesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <div className="w-full min-w-0 h-[250px] sm:h-[320px] md:h-[400px]">
+                            <ChartContainer config={timeSeriesChartConfig} className="h-full w-full min-w-0">
+                                <AreaChart data={timeSeriesData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="cashInFill" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -281,23 +281,23 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
                 </CardContent>
             </Card>
 
-            {/* Balance Trend Chart */}
-            <Card>
+            {/* Balance Trend Chart - responsive */}
+            <Card className="overflow-hidden">
                 <CardHeader>
                     <CardTitle>Balance Trend</CardTitle>
                     <CardDescription>Cash balance over time</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="w-full min-w-0">
                     {loading ? (
-                        <Skeleton className="h-[300px] w-full" />
+                        <Skeleton className="h-[220px] sm:h-[280px] md:h-[300px] w-full" />
                     ) : timeSeriesData.length === 0 ? (
-                        <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                        <div className="h-[220px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-muted-foreground text-sm">
                             No data available
                         </div>
                     ) : (
-                        <div className="h-[300px]">
-                            <ChartContainer config={timeSeriesChartConfig} className="h-full w-full">
-                                <LineChart data={timeSeriesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <div className="w-full min-w-0 h-[220px] sm:h-[280px] md:h-[300px]">
+                            <ChartContainer config={timeSeriesChartConfig} className="h-full w-full min-w-0">
+                                <LineChart data={timeSeriesData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted/40" />
                                     <XAxis
                                         dataKey="date"
@@ -330,23 +330,23 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
                 </CardContent>
             </Card>
 
-            {/* Expense by Category Charts */}
-            <div className="grid gap-4 md:grid-cols-2">
-                <Card>
+            {/* Expense by Category Charts - single column on mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full min-w-0">
+                <Card className="overflow-hidden">
                     <CardHeader>
                         <CardTitle>Expenses by Category</CardTitle>
                         <CardDescription>Breakdown of expenses by category</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="w-full min-w-0">
                         {loading ? (
-                            <Skeleton className="h-[300px] w-full" />
+                            <Skeleton className="h-[240px] sm:h-[280px] md:h-[300px] w-full" />
                         ) : categoryData.length === 0 ? (
-                            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                            <div className="h-[240px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-muted-foreground text-sm">
                                 No expense data available
                             </div>
                         ) : (
-                            <div className="h-[300px]">
-                                <ChartContainer config={categoryChartConfig} className="h-full w-full">
+                            <div className="w-full min-w-0 h-[240px] sm:h-[280px] md:h-[300px]">
+                                <ChartContainer config={categoryChartConfig} className="h-full w-full min-w-0">
                                     <PieChart>
                                         <Pie
                                             data={categoryData}
@@ -354,7 +354,7 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
                                             cy="50%"
                                             labelLine={false}
                                             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                            outerRadius={100}
+                                            outerRadius={80}
                                             fill="#8884d8"
                                             dataKey="total_amount"
                                         >
@@ -370,25 +370,25 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="overflow-hidden">
                     <CardHeader>
                         <CardTitle>Top Expense Categories</CardTitle>
                         <CardDescription>Highest spending categories</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="w-full min-w-0">
                         {loading ? (
-                            <Skeleton className="h-[300px] w-full" />
+                            <Skeleton className="h-[240px] sm:h-[280px] md:h-[300px] w-full" />
                         ) : categoryData.length === 0 ? (
-                            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                            <div className="h-[240px] sm:h-[280px] md:h-[300px] flex items-center justify-center text-muted-foreground text-sm">
                                 No expense data available
                             </div>
                         ) : (
-                            <div className="h-[300px]">
-                                <ChartContainer config={categoryChartConfig} className="h-full w-full">
+                            <div className="w-full min-w-0 h-[240px] sm:h-[280px] md:h-[300px]">
+                                <ChartContainer config={categoryChartConfig} className="h-full w-full min-w-0">
                                     <BarChart
                                         data={categoryData.slice(0, 5)}
                                         layout="vertical"
-                                        margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                                        margin={{ top: 5, right: 10, left: 60, bottom: 5 }}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted" />
                                         <XAxis type="number" hide />
@@ -396,10 +396,10 @@ export function CashFlowCharts({ onExport }: CashFlowChartsProps) {
                                             dataKey="category_name"
                                             type="category"
                                             stroke="#888888"
-                                            fontSize={12}
+                                            fontSize={11}
                                             tickLine={false}
                                             axisLine={false}
-                                            width={70}
+                                            width={56}
                                         />
                                         <ChartTooltip content={<ChartTooltipContent />} />
                                         <Bar

@@ -612,24 +612,12 @@ export default function DashboardClient() {
         <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20 relative">
           <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           <AlertTitle className="text-amber-900 dark:text-amber-100">
-            Admin access required
+            Platform administration
           </AlertTitle>
           <AlertDescription className="text-amber-800 dark:text-amber-200">
-            You were redirected from /admin because your account does not have
-            the{" "}
-            <code className="rounded bg-amber-200/50 dark:bg-amber-900/30 px-1">
-              super_admin
-            </code>{" "}
-            role. To access the admin dashboard, your profile role must be set
-            to{" "}
-            <code className="rounded bg-amber-200/50 dark:bg-amber-900/30 px-1">
-              super_admin
-            </code>{" "}
-            in the database. See{" "}
-            <code className="rounded bg-amber-200/50 dark:bg-amber-900/30 px-1">
-              ADMIN_ACCESS_FIX.md
-            </code>{" "}
-            for step-by-step instructions.
+            The area you tried to open is reserved for platform administrators only.
+            Your account has access to this dashboard to manage your organization.
+            If you need platform-level support, please contact your software provider.
           </AlertDescription>
           <Button
             variant="ghost"

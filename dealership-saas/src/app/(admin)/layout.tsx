@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminHeader } from "@/components/layout/admin-header";
 import {
@@ -8,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AlertCircle, KeyRound } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminLayout({
   children,
@@ -15,6 +17,20 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  // Server-side guard: only super_admin (platform owner) may access /admin.
+  // Organization/dealer admins must never see this panel.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+  const { data: isSuperAdmin } = await supabase.rpc("is_super_admin");
+  if (!isSuperAdmin) {
+    redirect("/dashboard?error=admin_required");
+  }
 
   if (!hasServiceRoleKey) {
     return (
