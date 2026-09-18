@@ -9,10 +9,8 @@ import {
   HandshakeIcon,
   FileText,
   Settings,
-  ChevronLeft,
-  ChevronRight,
-  Moon,
-  Sun,
+  ChevronsLeft,
+  ChevronsRight,
   BookOpen,
   BookText,
   TrendingUp,
@@ -27,7 +25,6 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { useAuthStore, useSidebarStore } from "@/lib/store";
 import { filterNavByRole } from "@/lib/auth/permissions";
 import {
@@ -35,14 +32,6 @@ import {
   type StaffModuleKey,
 } from "@/lib/auth/module-access";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 type ModuleKey =
   | "dashboard"
@@ -157,12 +146,6 @@ export function Sidebar() {
   const pathname = usePathname();
   const { isCollapsed, setCollapsed } = useSidebarStore();
   const { profile, organization } = useAuthStore();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const role = profile?.role;
 
@@ -232,18 +215,42 @@ export function Sidebar() {
       )}
     >
       <div className="flex h-full min-h-0 flex-col">
-        {/* Logo - top padding so icon/name not flush to viewport edge */}
-        <div className="flex min-h-[4.5rem] shrink-0 items-center justify-between border-b px-4 pt-4 pb-3">
-          {!isCollapsed && (
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <Car className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold">Dealer 360</span>
-            </Link>
+        {/* Logo + collapse control */}
+        <div
+          className={cn(
+            "flex min-h-[4.5rem] shrink-0 items-center border-b px-3 pt-4 pb-3",
+            isCollapsed ? "justify-center" : "justify-between gap-2"
           )}
-          {isCollapsed && (
-            <Link href="/dashboard" className="mx-auto">
-              <Car className="h-6 w-6 text-primary" />
-            </Link>
+        >
+          {!isCollapsed ? (
+            <>
+              <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
+                <Car className="h-6 w-6 shrink-0 text-primary" />
+                <span className="truncate text-lg font-bold">Dealer 360</span>
+              </Link>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setCollapsed(true)}
+                aria-label="Collapse sidebar"
+                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(false)}
+              aria-label="Expand sidebar"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              title="Expand"
+            >
+              <ChevronsRight className="h-4 w-4" />
+            </Button>
           )}
         </div>
 
@@ -284,7 +291,7 @@ export function Sidebar() {
           </nav>
         </ScrollArea>
 
-        {/* Bottom Navigation - shrink-0 so Theme + Collapse always visible */}
+        {/* Bottom Navigation */}
         <div className="shrink-0 border-t px-3 py-3">
           <nav className="flex flex-col gap-1">
             {bottomNavigation.map((item) => {
@@ -310,68 +317,6 @@ export function Sidebar() {
               );
             })}
           </nav>
-
-          <Separator className="my-2" />
-
-          {/* Theme Toggle */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-muted-foreground hover:bg-muted hover:text-foreground",
-                  isCollapsed && "justify-center px-2"
-                )}
-                title={isCollapsed ? "Theme" : undefined}
-              >
-                {mounted && theme === "dark" ? (
-                  <Moon className="h-5 w-5 shrink-0" />
-                ) : (
-                  <Sun className="h-5 w-5 shrink-0" />
-                )}
-                {!isCollapsed && <span className="ml-3">Theme</span>}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align={isCollapsed ? "start" : "end"}
-              side={isCollapsed ? "right" : "top"}
-            >
-              <DropdownMenuItem onClick={() => setTheme("light")}>
-                <Sun className="mr-2 h-4 w-4" />
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
-                <Moon className="mr-2 h-4 w-4" />
-                Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
-                <span className="mr-2 h-4 w-4">⚙️</span>
-                System
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Separator className="my-2" />
-
-          {/* Collapse Button */}
-          <Button
-            variant="ghost"
-            onClick={() => setCollapsed(!isCollapsed)}
-            className={cn(
-              "w-full justify-start text-muted-foreground hover:bg-muted hover:text-foreground",
-              "px-3 py-2 text-sm font-medium rounded-[4px]",
-              isCollapsed && "justify-center px-2"
-            )}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="h-5 w-5 shrink-0" />
-            ) : (
-              <>
-                <ChevronLeft className="h-5 w-5 shrink-0" />
-                Collapse
-              </>
-            )}
-          </Button>
         </div>
       </div>
     </aside>

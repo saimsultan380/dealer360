@@ -17,7 +17,7 @@ const Sidebar = dynamic(() => import("./sidebar").then((m) => m.Sidebar), {
 const Header = dynamic(() => import("./header").then((m) => m.Header), {
   ssr: false,
   loading: () => (
-    <header className="fixed top-0 left-0 right-0 z-30 h-14 sm:h-16 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:left-64" />
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 sm:h-16 border-b bg-background lg:left-64" />
   ),
 });
 const MobileBottomNav = dynamic(

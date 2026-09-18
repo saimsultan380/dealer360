@@ -178,8 +178,8 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 left-0 z-30 flex h-14 sm:h-16 items-center justify-between border-b",
-        "bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "fixed top-0 right-0 left-0 z-50 flex h-14 sm:h-16 items-center justify-between border-b",
+        "bg-background",
         "px-2 sm:px-4 md:px-6 transition-all duration-300",
         // Only offset on desktop; keep full-width on mobile.
         isCollapsed ? "lg:left-16" : "lg:left-64"
@@ -303,7 +303,7 @@ export function Header() {
         <ThemeToggle />
 
         {/* Notifications */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -533,7 +533,7 @@ export function Header() {
         </DropdownMenu>
 
         {/* User Menu */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"

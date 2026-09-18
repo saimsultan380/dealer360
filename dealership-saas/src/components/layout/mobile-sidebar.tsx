@@ -31,7 +31,6 @@ import {
   type StaffModuleKey,
 } from "@/lib/auth/module-access";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { LucideIcon } from "lucide-react";
 
 type ModuleKey =
@@ -251,7 +250,7 @@ export function MobileSidebar() {
         </nav>
       </ScrollArea>
 
-      {/* Bottom: Settings + Theme + Close (always visible, safe-area padding) */}
+      {/* Bottom: Settings + Close */}
       <div className="shrink-0 border-t px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Separator className="mb-4" />
         <nav className="flex flex-col gap-1">
@@ -278,23 +277,15 @@ export function MobileSidebar() {
           })}
         </nav>
         <Separator className="my-3" />
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3 px-3 py-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              Theme
-            </span>
-            <ThemeToggle />
-          </div>
-          <SheetClose asChild>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-[4px] px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <X className="h-5 w-5 shrink-0" />
-              <span>Close menu</span>
-            </button>
-          </SheetClose>
-        </div>
+        <SheetClose asChild>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-[4px] px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-5 w-5 shrink-0" />
+            <span>Close menu</span>
+          </button>
+        </SheetClose>
       </div>
     </div>
   );

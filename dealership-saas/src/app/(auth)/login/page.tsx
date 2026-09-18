@@ -17,7 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CarLoader } from "@/components/ui/car-loader";
 import { createClient } from "@/lib/supabase/client";
 
 const loginSchema = z.object({
@@ -71,90 +70,84 @@ function LoginPageInner() {
   };
 
   return (
-    <>
-      {isSubmitting ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/70 backdrop-blur-sm">
-          <CarLoader label="Signing in…" size="lg" />
+    <Card className="shadow-xl">
+      <CardHeader className="space-y-2 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary">
+          <Car className="h-6 w-6 text-primary-foreground" />
         </div>
-      ) : null}
-      <Card className="shadow-xl">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary">
-            <Car className="h-6 w-6 text-primary-foreground" />
+        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+        <CardDescription>Sign in to your Dealer 360 account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {searchParams.get("error") === "inactive" && !error && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              Your account is inactive. Please contact an administrator.
+            </div>
+          )}
+          {searchParams.get("error") === "auth" && !error && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              Authentication failed. Please try again.
+            </div>
+          )}
+          {error && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              {...register("email")}
+              disabled={isSubmitting}
+            />
+            {errors.email && (
+              <p className="text-sm text-destructive">
+                {errors.email.message}
+              </p>
+            )}
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your Dealer 360 account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {searchParams.get("error") === "inactive" && !error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                Your account is inactive. Please contact an administrator.
-              </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              {...register("password")}
+              disabled={isSubmitting}
+            />
+            {errors.password && (
+              <p className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
             )}
-            {searchParams.get("error") === "auth" && !error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                Authentication failed. Please try again.
-              </div>
+          </div>
+
+          <div className="flex items-center justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
             )}
-            {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register("email")}
-                disabled={isSubmitting}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
-                disabled={isSubmitting}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-end">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-muted-foreground hover:text-primary"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
-          </form>
+          </Button>
+        </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
@@ -167,7 +160,6 @@ function LoginPageInner() {
           </div>
         </CardContent>
       </Card>
-    </>
   );
 }
 

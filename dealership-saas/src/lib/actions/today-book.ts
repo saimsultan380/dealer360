@@ -446,7 +446,7 @@ export async function getTodayActivities(): Promise<{
       activities.push({
         id: lead.id,
         type: "lead",
-        title: `New Lead - ${lead.name}`,
+        title: `New Customer - ${lead.name}`,
         description: `${lead.phone || ""} - ${lead.status || "new"}`,
         status: lead.status,
         timestamp: lead.created_at,

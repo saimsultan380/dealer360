@@ -14,9 +14,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { SheetClose } from "@/components/ui/sheet";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -63,15 +61,6 @@ export function AdminMobileSidebar() {
           })}
         </nav>
       </ScrollArea>
-      <div className="shrink-0 border-t px-3 py-4">
-        <Separator className="mb-3" />
-        <div className="flex items-center justify-between gap-3 px-3 py-2">
-          <span className="text-sm font-medium text-muted-foreground">
-            Theme
-          </span>
-          <ThemeToggle />
-        </div>
-      </div>
     </div>
   );
 }

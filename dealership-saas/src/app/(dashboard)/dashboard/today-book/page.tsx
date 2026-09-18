@@ -62,46 +62,6 @@ import {
   subscribeToVehicles,
 } from "@/lib/supabase/realtime";
 
-// Sparkline component for metric cards
-function Sparkline({
-  data,
-  color,
-}: {
-  data: { hour: number; value: number }[];
-  color: string;
-}) {
-  return (
-    <div className="h-12 w-full opacity-60">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={data}
-          margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient
-              id={`gradient-${color}`}
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            fill={`url(#gradient-${color})`}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
 function ActivityIcon({ type }: { type: TodayActivity["type"] }) {
   switch (type) {
     case "deal":
@@ -285,15 +245,16 @@ export default function TodayBookPage() {
           <Skeleton className="h-9 w-64 mb-2" />
           <Skeleton className="h-5 w-96" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {[...Array(5)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-4 w-24" />
+            <Card key={i} className="py-0 gap-0">
+              <CardHeader className="px-3.5 pt-3.5 pb-1">
+                <Skeleton className="h-3 w-20" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-20 mb-2" />
-                <Skeleton className="h-3 w-32" />
+              <CardContent className="px-3.5 pb-3 pt-0">
+                <Skeleton className="h-6 w-16 mb-1" />
+                <Skeleton className="h-3 w-24 mb-2" />
+                <Skeleton className="h-8 w-full" />
               </CardContent>
             </Card>
           ))}
@@ -379,8 +340,17 @@ export default function TodayBookPage() {
       payments: points.map((p) => ({ hour: p.hour, value: p.payments })),
       vehicles: points.map((p) => ({ hour: p.hour, value: p.vehicles })),
       leads: points.map((p) => ({ hour: p.hour, value: p.leads })),
+      revenue: points.map((p) => ({ hour: p.hour, value: p.revenue })),
     };
   }, [hourly]);
+
+  const formatCompactPKR = (value: number) => {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num === 0) return "PKR 0";
+    if (num >= 1_000_000) return `PKR ${(num / 1_000_000).toFixed(1)}M`;
+    if (num >= 1_000) return `PKR ${(num / 1_000).toFixed(0)}K`;
+    return `PKR ${num.toLocaleString()}`;
+  };
 
   const stats = [
     {
@@ -408,12 +378,20 @@ export default function TodayBookPage() {
       sparklineData: spark.vehicles,
     },
     {
-      title: "New Leads",
+      title: "New Customer",
       value: summary.newLeads.toString(),
-      description: "Leads created today",
+      description: "Customers added today",
       icon: Users,
       color: "#f97316",
       sparklineData: spark.leads,
+    },
+    {
+      title: "Revenue",
+      value: formatCompactPKR(summary.totalRevenue),
+      description: "From deals today",
+      icon: TrendingUp,
+      color: "#059669",
+      sparklineData: spark.revenue,
     },
   ];
 
@@ -432,36 +410,71 @@ export default function TodayBookPage() {
         </p>
       </div>
 
-      {/* Summary Cards with Glassmorphism */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Smart summary cards — 5 across on large, wrap on smaller */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card
             key={stat.title}
             className={cn(
-              "relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              "relative overflow-hidden py-0 gap-0 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
             )}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 px-3.5 pt-3.5 pb-1 relative z-10">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate pr-1">
                 {stat.title}
               </CardTitle>
               <div
-                className="h-10 w-10 rounded-lg flex items-center justify-center"
+                className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center"
                 style={{
                   backgroundColor: `${stat.color}15`,
                 }}
               >
-                <stat.icon className="h-5 w-5" style={{ color: stat.color }} />
+                <stat.icon className="h-4 w-4" style={{ color: stat.color }} />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-2xl font-bold mb-2 font-figures tabular-nums">
+            <CardContent className="relative z-10 px-3.5 pb-3 pt-0">
+              <div className="text-xl font-bold mb-0.5 font-figures tabular-nums truncate">
                 {stat.value}
               </div>
-              <p className="text-xs text-muted-foreground mb-3">
+              <p className="text-[11px] text-muted-foreground mb-2 truncate">
                 {stat.description}
               </p>
-              <Sparkline data={stat.sparklineData} color={stat.color} />
+              <div className="h-8 w-full opacity-60">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={stat.sparklineData}
+                    margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient
+                        id={`spark-${stat.title.replace(/\s+/g, "-")}`}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor={stat.color}
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor={stat.color}
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke={stat.color}
+                      strokeWidth={1.5}
+                      fill={`url(#spark-${stat.title.replace(/\s+/g, "-")})`}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         ))}

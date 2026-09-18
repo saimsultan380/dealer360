@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -97,7 +98,12 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [hasSearched, setHasSearched] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Focus input when opened
   useEffect(() => {
@@ -187,7 +193,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     router.push(result.link);
   };
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   // Group results by category
   const grouped = results.reduce<Record<string, SearchResult[]>>((acc, r) => {
@@ -199,16 +205,17 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   // Flatten for keyboard navigation index
   let flatIndex = -1;
 
-  return (
+  return createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop starts below the fixed header so the header stays sharp */}
       <div
-        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-in fade-in-0 duration-150"
+        className="fixed inset-x-0 bottom-0 top-14 z-40 bg-black/40 animate-in fade-in-0 duration-150 sm:top-16"
         onClick={() => onOpenChange(false)}
+        aria-hidden="true"
       />
 
       {/* Search Panel - responsive: full width on small screens, centered max-width on larger */}
-      <div className="fixed inset-0 z-50 flex items-start justify-center p-2 xs:p-3 sm:p-4 pt-[8vh] xs:pt-[10vh] sm:pt-[12vh] md:pt-[15vh] pointer-events-none">
+      <div className="fixed inset-x-0 bottom-0 top-14 z-40 flex items-start justify-center p-2 xs:p-3 sm:top-16 sm:p-4 pt-[8vh] xs:pt-[10vh] sm:pt-[12vh] md:pt-[15vh] pointer-events-none">
         <div
           className={cn(
             "pointer-events-auto w-full max-w-2xl",
@@ -218,6 +225,9 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
             "max-h-[82vh] xs:max-h-[78vh] sm:max-h-[72vh] md:max-h-[65vh]"
           )}
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Quick search"
         >
           {/* Search Input + Close */}
           <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-0 border-b min-h-12 sm:min-h-14">
@@ -415,6 +425,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
